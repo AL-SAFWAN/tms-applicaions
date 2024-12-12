@@ -1,0 +1,157 @@
+# Declared variables to be passed into your templates.
+
+frontend:
+  replicaCount: 1
+  image:
+    repository: alsafwan/tms-frontend
+    tag: v3.9
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  startupProbe:
+    httpGet: /health
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 70
+  env:
+    - name: NODE_ENV
+      value: production
+
+backend:
+  replicaCount: 1
+  image:
+    repository: alsafwan/tms-backend
+    tag: v2.5
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "100m"
+    limits:
+      memory: "1Gi"
+      cpu: "250m"
+  startupProbe:
+    httpGet: /health
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 85
+  serviceAccountName: myapp
+  volumes:
+    - name: secrets
+      csi:
+        driver: secrets-store.csi.k8s.io
+        readOnly: true
+        volumeAttributes:
+          secretProviderClass: "myapp-aws-secrets"
+  volumeMounts:
+    - name: secrets
+      mountPath: "/mnt/secrets"
+      readOnly: true
+  env:
+    - name: PROJECT_NAME
+      value: "tms app"
+    - name: ENVIRONMENT
+      value: "local"
+    - name: BACKEND_CORS_ORIGINS
+      value: "http://local.tms-application.com,https://local.tms-application.com"
+    - name: FIRST_SUPERUSER_FIRSTNAME
+      value: "Admin"
+    - name: FIRST_SUPERUSER_LASTNAME
+      value: "User"
+    - name: FIRST_SUPERUSER
+      value: "admin@example.com"
+    - name: FIRST_SUPERUSER_PASSWORD
+      value: "admin123" # Change this in production
+    - name: SECRET_KEY
+      value: "your-secret-key-here" # Change this in production
+    - name: SMTP_HOST
+      value: "mailcatcher"
+    - name: SMTP_PORT
+      value: "1025"
+    - name: SMTP_TLS
+      value: "false"
+    - name: EMAILS_FROM_EMAIL
+      value: "noreply@example.com"
+
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:381492056121:certificate/e6f3346f-6cb3-4ec9-9126-089545ec6cdb
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+  hosts:
+    - host: local.tms-applications.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+    - host: api.local.tms-applications.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: backend
+
+volumes: []
+
+volumeMounts: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
