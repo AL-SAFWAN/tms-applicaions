@@ -1,3 +1,4 @@
+# runs as a daemonset on each node in the cluster
 resource "aws_eks_addon" "pod_identity" {
   cluster_name  = aws_eks_cluster.eks.name
   addon_name    = "eks-pod-identity-agent"

@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: web-app
+  namespace: argocd
+  annotations:
+    # Define the images to be managed by Argo CD Image Updater
+    argocd-image-updater.argoproj.io/image-list: |
+      frontend=alsafwan/tms-frontend
+      backend=alsafwan/tms-backend
+
+    # Specify the Helm values paths that need to be updated
+    argocd-image-updater.argoproj.io/values.frontend.image.tag: "{{.NewTag}}"
+    argocd-image-updater.argoproj.io/values.backend.image.tag: "{{.NewTag}}"
+
+    # (Optional) Define update strategies or additional configurations if needed
+    # For example, setting a specific update strategy or image policy
+spec:
+  project: default
+
+  source:
+    repoURL: "https://github.com/AL-SAFWAN/tms-applicaions" # Replace with your actual repo URL
+    targetRevision: "main" # Or your desired branch/tag
+    path: "infra/helm/web-app" # Path to your existing Helm chart
+
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "kube-system" # Target namespace for your application
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
