@@ -177,3 +177,5 @@ Per-Environment Directories: Each environment (dev, test, prod) has its own fold
 
 - **Variables and Locals**: Variables like `environment`, `domain_name`, and subnet details are defined in `variables.tf` and `locals.tf` inside each environment directory.
 - **.tfvars Files**: `dev.tfvars`, `test.tfvars`, `prod.tfvars` set the `environment` variable and other overrides. Running `terraform apply -var-file=prod.tfvars` in `environments/prod` deploys the prod environment configuration.
+
+<!-- [TODo] add terraform grah to assigment  -->
