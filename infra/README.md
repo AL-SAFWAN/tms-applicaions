@@ -68,7 +68,6 @@ graph LR
 ### Kubernetes Components
 
 ```mermaid
-mermaid
 flowchart TD
 HelmChart[Helm Chart: Web-App] --> Deployment[K8s Deployment]
 Deployment --> ReplicaSet
