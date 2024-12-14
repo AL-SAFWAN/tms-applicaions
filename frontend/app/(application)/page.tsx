@@ -22,7 +22,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export default async function page() {
+export default function page() {
   console.log("Hello from the home page!");
   const enrolledCourses = [
     { id: 1, title: "BJJ Fundamentals", progress: 60, type: "bjj" },

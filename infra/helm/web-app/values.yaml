@@ -127,8 +127,7 @@ ingress:
   enabled: true
   className: alb
   annotations:
-    # [TODO] Update the certificate ARN with the updated domain to include prod, dev, test
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:381492056121:certificate/e6f3346f-6cb3-4ec9-9126-089545ec6cdb
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:381492056121:certificate/2a60833b-9fc3-4546-85ed-7f536f144ef1
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: "443"
     alb.ingress.kubernetes.io/scheme: internet-facing

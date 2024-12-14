@@ -47,29 +47,29 @@ def login(
         user.id, user.role, expires_delta=access_token_expires
     )
     # for development
-    # response.set_cookie(
-    #     key="access_token",
-    #     value=access_token,
-    #     max_age=3600,  # 1 hour
-    #     expires=3600,  # 1 hour
-    #     httponly=True,  # Prevent JavaScript access
-    #     # local
-    #     secure=False,  # Only for HTTPS
-    #     samesite="lax",  # Adjust based on your needs
-    # )
-
-    # for production
-    # if settings.ENVIRONMENT == "production":
     response.set_cookie(
         key="access_token",
         value=access_token,
         max_age=3600,  # 1 hour
         expires=3600,  # 1 hour
         httponly=True,  # Prevent JavaScript access
-        secure=True,  # Required for HTTPS
-        samesite="none",  # Required for cross-origin requests
-        domain=".tms-applications.com",  # Set cookie for main domain
+        # local
+        secure=False,  # Only for HTTPS
+        samesite="lax",  # Adjust based on your needs
     )
+
+    # for production
+    # if settings.ENVIRONMENT == "production":
+    # response.set_cookie(
+    #     key="access_token",
+    #     value=access_token,
+    #     max_age=3600,  # 1 hour
+    #     expires=3600,  # 1 hour
+    #     httponly=True,  # Prevent JavaScript access
+    #     secure=True,  # Required for HTTPS
+    #     samesite="none",  # Required for cross-origin requests
+    #     domain=".tms-applications.com",  # Set cookie for main domain
+    # )
     # else:
     #     response.set_cookie(
     #         key="access_token",

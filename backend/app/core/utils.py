@@ -50,7 +50,7 @@ def send_email(
         content_disposition="inline",
         data=image_data,
         mime_type="image/gif",
-        headers={"Content-ID": "<legionLogo>"},
+        headers={"Content-ID": "<tmsLogo>"},
     )
 
     smtp_options = {"host": settings.SMTP_HOST, "port": settings.SMTP_PORT}

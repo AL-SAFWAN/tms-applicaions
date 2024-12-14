@@ -4,8 +4,8 @@ import { FlipWordsDemo } from "@/components/main/Words";
 import { FeaturesSectionDemo } from "@/components/main/Feature";
 
 export const metadata: Metadata = {
-  title: "Legion Grappling Academy",
-  description: "Login to Grappling Academy to gain access",
+  title: "TMS App",
+  description: "Login to TMS Web App",
 };
 
 export default function AuthenticationPage({

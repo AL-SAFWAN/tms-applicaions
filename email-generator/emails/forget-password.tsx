@@ -30,7 +30,7 @@ export const ForgotPasswordEmail = ({
   validMins = "{{validMins}}",
   resetPasswordLink = "{{resetPasswordLink}}",
 }: ForgotPasswordEmailProps) => {
-  const previewText = "Reset Your Password for Legion Grappling Academy";
+  const previewText = "Reset Your Password for TMS";
 
   return (
     <Html>
@@ -62,9 +62,9 @@ export const ForgotPasswordEmail = ({
 
             {/* Password Reset Message */}
             <Text className="text-black text-base leading-6">
-              We received a request to reset your password for your Legion
-              Grappling Academy account. If you made this request, please click
-              the button below to set a new password:
+              We received a request to reset your password for your TMS account.
+              If you made this request, please click the button below to set a
+              new password:
             </Text>
 
             {/* Reset Password Button */}
@@ -95,18 +95,18 @@ export const ForgotPasswordEmail = ({
               If you have any questions or need further assistance, feel free to
               reach out to our support team at{" "}
               <Link
-                href="mailto:grapple@legiongrappling.com"
+                href="mailto:support@tms-applications.com"
                 className="text-blue-600 no-underline"
               >
-                grapple@legiongrappling.com
+                support@tms-applications.com
               </Link>
               .
             </Text>
 
             <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full mb-0" />
             <Text className=" text-xs text-zinc-400">
-              Legion Grappling Academy Unit 5 Transform House, London, LDN E10
-              7QF 02034908660
+              You are receiving this email because you have an account with TMS.
+              If you did not create an account, please ignore this email.
             </Text>
           </Container>
         </Body>
@@ -117,8 +117,7 @@ export const ForgotPasswordEmail = ({
 
 ForgotPasswordEmail.PreviewProps = {
   firstName: "John",
-  resetPasswordLink:
-    "https://www.legiongrappling.com/reset-password?token=abc123",
+  resetPasswordLink: "https://tms-applications.com/reset-password?token=abc123",
   validMins: "60",
 } as ForgotPasswordEmailProps;
 

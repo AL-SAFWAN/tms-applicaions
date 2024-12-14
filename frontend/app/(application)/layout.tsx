@@ -6,8 +6,8 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import Header from "@/components/sidebar/nav-breadcrumb";
 
 export const metadata: Metadata = {
-  title: "Legion App",
-  description: "Legion Web App",
+  title: "TMS App",
+  description: "TMS Web App",
 };
 
 export default function RootLayout({

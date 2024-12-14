@@ -1,5 +1,6 @@
-
-# Define the custom ClusterRole "viewer"
+# RBAC belongs to the Kubernetes control plane layer 
+# (and is not directly related to the AWS IAM layer).
+# Hence not in eks or iam modules 
 resource "kubernetes_cluster_role" "viewer" {
   metadata {
     name = "viewer"
@@ -12,7 +13,6 @@ resource "kubernetes_cluster_role" "viewer" {
   }
 }
 
-# Bind the "viewer" ClusterRole to the "my-viewer" group
 resource "kubernetes_cluster_role_binding" "my_viewer_binding" {
   metadata {
     name = "my-viewer-binding"
@@ -31,7 +31,6 @@ resource "kubernetes_cluster_role_binding" "my_viewer_binding" {
   }
 }
 
-# Bind the existing "cluster-admin" ClusterRole to the "my-admin" group
 resource "kubernetes_cluster_role_binding" "my_admin_binding" {
   metadata {
     name = "my-admin-binding"
@@ -49,3 +48,4 @@ resource "kubernetes_cluster_role_binding" "my_admin_binding" {
     api_group = "rbac.authorization.k8s.io"
   }
 }
+

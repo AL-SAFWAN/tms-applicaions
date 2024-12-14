@@ -23,7 +23,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { LegionHeader } from "./nav-logo";
+import { TMSHeader } from "./nav-logo";
 // This is sample data.
 const data = {
   navMain: [
@@ -129,7 +129,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <LegionHeader />
+        <TMSHeader />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

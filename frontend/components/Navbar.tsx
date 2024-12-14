@@ -2,20 +2,15 @@ import Link from "next/link";
 import React from "react";
 import { ModeToggle } from "@/components/main/Swtich";
 import Image from "next/image";
+import { TicketIcon } from "lucide-react";
 
 function Navbar() {
   return (
     <header className="z-[100] flex w-full items-center justify-between border-foreground/10 bg-background/50 p-2 backdrop-blur-lg">
-      <aside className="group flex items-center gap-[2px]">
-        <Image
-          className="m-2 size-11 object-contain invert dark:invert-0"
-          src={"/logo.png"}
-          width={250}
-          height={200}
-          alt="mufti menk"
-        />
+      <aside className="group flex items-center gap-[2px] rounded-lg">
+        <TicketIcon className="m-2 size-7 rounded-lg object-contain" />
         <p className="text-xl font-bold tracking-tighter">
-          Legion Grappling Academy
+          Ticket Management System
         </p>
       </aside>
 
