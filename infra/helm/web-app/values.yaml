@@ -86,7 +86,6 @@ backend:
     maxReplicas: 2
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 85
-  serviceAccountName: myapp
   volumes:
     - name: secrets
       csi:
@@ -128,12 +127,15 @@ ingress:
   enabled: true
   className: alb
   annotations:
+    # [TODO] Update the certificate ARN with the updated domain to include prod, dev, test
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:381492056121:certificate/e6f3346f-6cb3-4ec9-9126-089545ec6cdb
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: "443"
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/manage-backend-security-group-rules: "true" # Ensure security group cleanup
+    alb.ingress.kubernetes.io/load-balancer-attributes: "deletion_protection.enabled=false" # Allow LB deletion
   hosts:
     - host: local.tms-applications.com
       paths:
@@ -155,3 +157,7 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+serviceAccount:
+  annotations: {}
+  name: myapp

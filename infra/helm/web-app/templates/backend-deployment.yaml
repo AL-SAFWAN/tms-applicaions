@@ -26,7 +26,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: {{ .Values.backend.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       initContainers:
         - name: run-migrations
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
