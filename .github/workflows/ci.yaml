@@ -39,10 +39,17 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
+      - name: Convert line endings
+        working-directory: infra/terraform/environments/prod
+        run: dos2unix tf_output.json
+
+      - name: Test JQ again
+        working-directory: infra/terraform/environments/prod
+        run: jq '.' tf_output.json
+
       - name: Extract IAM Role ARN
         working-directory: infra/terraform/environments/prod
         run: |
-          cat  dos2unix tf_output.json | jq '.iam_secrets_role_arn.value'
           ROLE_ARN=$(jq  '.iam_secrets_role_arn.value' tf_output.json)
           echo "ROLE_ARN=$ROLE_ARN" >> $GITHUB_ENV
 
