@@ -144,13 +144,6 @@ output "iam_secrets_role_arn" {
   description = "Pass-through output from iam_secrets module"
 }
 
-output "check" {
-  value = "check"
-  description = "Pass-through output from iam_secrets module"
-}
-
-
-
 # resource "helm_release" "web-app" {
 #   name      = "web-app-release" # This value becomes .Release.Name in templates
 #   chart     = "../../../helm/web-app" # This is the path to the chart directory
