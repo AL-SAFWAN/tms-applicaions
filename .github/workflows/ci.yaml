@@ -5,21 +5,18 @@ on:
 
 permissions:
   contents: write
-  id-token: write # Required for OIDC
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: eu-west-2
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
-          aws-region: eu-west-2
-          role-session-name: github-action
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -34,9 +31,4 @@ jobs:
       - name: Terraform Apply
         run: |
           cd infra/terraform/environments/prod
-          terraform apply -var-file=prod.tfvars -auto-approve
-
-      - name: Terraform Output
-        run: |
-          cd infra/terraform/environments/prod
-          terraform output -json > tf_output.json
+          terraform apply -auto-approve
