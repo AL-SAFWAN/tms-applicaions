@@ -1,0 +1,42 @@
+name: Build and Push to ECR Public
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      FRONTEND_IMAGE: "public.ecr.aws/m8h2m6a1/tms-frontend"
+      BACKEND_IMAGE: "public.ecr.aws/m8h2m6a1/tms-backend"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "eu-west-2"
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Build and push Frontend Image
+        run: |
+          COMMIT_SHORT=$(echo $GITHUB_SHA | cut -c1-7)
+          docker build -t $FRONTEND_IMAGE:latest -t $FRONTEND_IMAGE:$COMMIT_SHORT ./frontend
+          docker push $FRONTEND_IMAGE:latest
+          docker push $FRONTEND_IMAGE:$COMMIT_SHORT
+
+      - name: Build and push Backend Image
+        run: |
+          COMMIT_SHORT=$(echo $GITHUB_SHA | cut -c1-7)
+          docker build -t $BACKEND_IMAGE:latest -t $BACKEND_IMAGE:$COMMIT_SHORT ./backend
+          docker push $BACKEND_IMAGE:latest
+          docker push $BACKEND_IMAGE:$COMMIT_SHORT

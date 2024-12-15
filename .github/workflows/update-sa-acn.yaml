@@ -1,4 +1,4 @@
-name: CI Terraform
+name: Update Service Account ARN in Helm Chart
 on:
   push:
     branches: [main]
@@ -34,14 +34,15 @@ jobs:
       - name: Terraform Plan
         id: plan
         working-directory: infra/terraform/environments/prod
+        # Exit code 0 if no changes are required.
+        # Exit code 2 if changes are found.
         run: |
           set +e
           terraform plan -var-file=prod.tfvars -detailed-exitcode
           CODE=$?
           set -e
           echo "exitcode=$CODE" >> $GITHUB_OUTPUT
-      # Exit code 0 if no changes are required.
-      # Exit code 2 if changes are found.
+
       # Only proceed if Terraform Plan indicates changes (exit code 2)
       - name: Terraform Apply
         if: steps.plan.outputs.exitcode == '2'
