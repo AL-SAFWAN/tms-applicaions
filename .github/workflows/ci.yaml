@@ -22,11 +22,10 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.0
-
       - name: Terraform Apply
         run: |
           cd infra/terraform/environments/prod
-          terraform apply -auto-approve
+          terraform apply -var-file=prod.tfvars -auto-approve
 
       - name: Terraform Output
         run: |
