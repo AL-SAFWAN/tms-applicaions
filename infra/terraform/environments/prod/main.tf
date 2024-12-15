@@ -39,7 +39,30 @@ resource "helm_release" "argo_cd" {
     value = true
   }
 }
+module "iam_argo_iu" {
+  source = "../../modules/iam/iam-argo-iu"
 
+  cluster_name           = module.eks.cluster_name
+  namespace             = "argocd"
+  service_account_name  = "argocd-image-updater"
+  tags = {
+    Environment = var.environment
+  }
+}
+
+
+resource "helm_release" "updater" {
+  name = "updater"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argocd-image-updater"
+  namespace        = "argocd"
+  create_namespace = true
+  version          = "0.11.0"
+  values = [
+    file("${path.module}/../../../helm/image-updater/values.yaml"),
+  ]
+  depends_on = [helm_release.argocd]
+}
 
 module "iam_developer" {
   source          = "../../modules/iam/iam-dev"
@@ -81,6 +104,8 @@ module "iam_external_dns" {
   federated_identity_arn = module.eks.federated_identity_arn
   federated_identity_url = module.eks.federated_identity_url
 }
+
+
 resource "helm_release" "external_dns" {
   name       = "external-dns"
   repository = "https://kubernetes-sigs.github.io/external-dns/"
@@ -152,7 +177,6 @@ output "iam_secrets_role_arn" {
 #   wait      = true
 
 #   values = [
-#     file("${path.module}/../../../helm/web-app/values.yaml"),
 #     jsonencode({
 #       ingress = {
 #         enabled = true
