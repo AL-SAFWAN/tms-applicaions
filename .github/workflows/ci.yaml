@@ -14,7 +14,6 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: eu-west-2
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -23,6 +22,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.0
+          terraform_wrapper: false
 
       - name: Terraform Init
         working-directory: infra/terraform/environments/prod
@@ -39,10 +39,6 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Convert line endings
-        working-directory: infra/terraform/environments/prod
-        run: dos2unix tf_output.json
-
       - name: Test JQ again
         working-directory: infra/terraform/environments/prod
         run: jq '.' tf_output.json
@@ -50,6 +46,7 @@ jobs:
       - name: Extract IAM Role ARN
         working-directory: infra/terraform/environments/prod
         run: |
+          cat tf_output.json
           ROLE_ARN=$(jq  '.iam_secrets_role_arn.value' tf_output.json)
           echo "ROLE_ARN=$ROLE_ARN" >> $GITHUB_ENV
 
