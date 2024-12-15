@@ -19,7 +19,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: eu-west-2
-          role-session-name: GitHubActions
+          role-session-name: github-action
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
