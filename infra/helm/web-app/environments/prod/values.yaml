@@ -18,7 +18,7 @@ ingress:
 backend:
   extraEnv:
     - name: POSTGRES_SERVER
-      value: db.app.tms-applications.com
+      value: app-tms-eks-postgres
     - name: POSTGRES_PORT
       value: "5432"
     - name: POSTGRES_DB
