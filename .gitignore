@@ -8,7 +8,6 @@ package-lock.json
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
-*.tfvars
 .terraform/providers/
 **/.terraform/*
 terraform-provider-*
