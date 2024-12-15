@@ -159,5 +159,7 @@ tolerations: []
 affinity: {}
 
 serviceAccount:
-  annotations: {}
+  create: true
   name: myapp
+  annotations:
+    "eks.amazonaws.com/role-arn": "REPLACE_ME"

@@ -37,3 +37,22 @@ jobs:
         run: |
           cd infra/terraform/environments/prod
           terraform output -json > tf_output.json
+      - name: Extract IAM Role ARN
+        run: |
+          export ROLE_ARN=$(jq -r '.module_iam_secrets_role_arn.value' tf_output.json)
+          echo "ROLE_ARN=$ROLE_ARN" >> $GITHUB_ENV\
+
+      - name: Install yq
+        run: sudo apt-get install -y yq
+
+      - name: Update values.yaml
+        run: |
+          yq -i '.serviceAccount.annotations."eks.amazonaws.com/role-arn" = env(ROLE_ARN)' path/to/values.yaml
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add path/to/values.yaml
+          git commit -m "Update IAM Role ARN in values.yaml"
+          git push
