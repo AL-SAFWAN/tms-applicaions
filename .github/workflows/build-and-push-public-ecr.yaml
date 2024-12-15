@@ -13,7 +13,6 @@ jobs:
     env:
       FRONTEND_IMAGE: "public.ecr.aws/m8h2m6a1/tms-frontend"
       BACKEND_IMAGE: "public.ecr.aws/m8h2m6a1/tms-backend"
-      AWS_REGION: "us-east-1"
 
     steps:
       - name: Checkout code
@@ -28,7 +27,7 @@ jobs:
 
       - name: Login to Public ECR
         run: |
-          aws ecr-public get-login-password --region eu-west-2 | docker login --username AWS --password-stdin public.ecr.aws
+          aws ecr-public get-login-password --region "us-east-1" | docker login --username AWS --password-stdin public.ecr.aws
 
       - name: Build Frontend Image
         run: |
