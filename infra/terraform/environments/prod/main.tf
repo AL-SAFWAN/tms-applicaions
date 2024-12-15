@@ -138,6 +138,10 @@ resource "aws_route53_record" "db_record" {
 }
 
 
+output "iam_secrets_role_arn" {
+  value = module.iam_secrets.role_arn
+  description = "Pass-through output from iam_secrets module"
+}
 # resource "helm_release" "web-app" {
 #   name      = "web-app-release" # This value becomes .Release.Name in templates
 #   chart     = "../../../helm/web-app" # This is the path to the chart directory
@@ -177,7 +181,7 @@ resource "aws_route53_record" "db_record" {
 #         create = true
 #         name   = "myapp"
 #         annotations = {
-#           "eks.amazonaws.com/role-arn" = module.iam_secrets.role_arn
+#           "eks.amazonaws.com/role-arn" = 
 #         }
 #       },
 #       backend = {
