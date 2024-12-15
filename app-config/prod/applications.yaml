@@ -13,7 +13,7 @@ spec:
       releaseName: web-app-release
       # Reference prod values
       valueFiles:
-        - ../../../app-config/prod/values.yaml
+        - app-config/prod/values.yaml
   destination:
     namespace: kube-system
     server: "https://kubernetes.default.svc"
