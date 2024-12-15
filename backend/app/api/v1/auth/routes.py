@@ -38,48 +38,39 @@ def login(
     user = operations.authenticate(
         session=session, email=form_data.username, password=form_data.password
     )
+
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
         user.id, user.role, expires_delta=access_token_expires
     )
-    # for development
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        max_age=3600,  # 1 hour
-        expires=3600,  # 1 hour
-        httponly=True,  # Prevent JavaScript access
-        # local
-        secure=False,  # Only for HTTPS
-        samesite="lax",  # Adjust based on your needs
-    )
 
-    # for production
-    # if settings.ENVIRONMENT == "production":
-    # response.set_cookie(
-    #     key="access_token",
-    #     value=access_token,
-    #     max_age=3600,  # 1 hour
-    #     expires=3600,  # 1 hour
-    #     httponly=True,  # Prevent JavaScript access
-    #     secure=True,  # Required for HTTPS
-    #     samesite="none",  # Required for cross-origin requests
-    #     domain=".tms-applications.com",  # Set cookie for main domain
-    # )
-    # else:
-    #     response.set_cookie(
-    #         key="access_token",
-    #         value=access_token,
-    #         max_age=3600,  # 1 hour
-    #         expires=3600,  # 1 hour
-    #         httponly=True,
-    #         secure=False,  # For development over HTTP
-    #         samesite="lax",
-    #     )
+    if settings.ENVIRONMENT == "production":
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            max_age=3600,  # 1 hour
+            expires=3600,  # 1 hour
+            httponly=True,  # Prevent JavaScript access
+            secure=True,  # Required for HTTPS
+            samesite="none",  # Required for cross-origin requests
+            domain=".tms-applications.com",  # Set cookie for main domain
+        )
+    else:
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            max_age=3600,  # 1 hour
+            expires=3600,  # 1 hour
+            httponly=True,  # Prevent JavaScript access
+            # local
+            secure=False,  # Only for HTTPS
+            samesite="lax",  # Adjust based on your needs
+        )
 
     return user
 
