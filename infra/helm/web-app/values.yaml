@@ -4,7 +4,7 @@ frontend:
   replicaCount: 1
   image:
     repository: "public.ecr.aws/m8h2m6a1/tms-frontend"
-    tag: v3.9
+    tag: latest
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -49,7 +49,7 @@ backend:
   replicaCount: 1
   image:
     repository: "public.ecr.aws/m8h2m6a1/tms-backend"
-    tag: v2.5
+    tag: latest
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
