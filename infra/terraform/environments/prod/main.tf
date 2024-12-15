@@ -29,8 +29,15 @@ resource "helm_release" "argo_cd" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
   namespace  = "argocd"
+  version    = "7.7.10"
+
   create_namespace = true
-  version    = "7.3.11"
+
+  set {
+    # Run server without TLS
+    name  = "configs.params.server\\.insecure"
+    value = true
+  }
 }
 
 
