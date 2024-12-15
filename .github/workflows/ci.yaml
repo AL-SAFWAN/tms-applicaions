@@ -73,7 +73,7 @@ jobs:
         id: compareARNs
         run: |
           CURRENT_ARN=$(yq -r '.serviceAccount.annotations."eks.amazonaws.com/role-arn"' infra/helm/web-app/environments/prod/values.yaml)
-          if [ "$CURRENT_ARN" = "$ROLE_ARN" ]; then
+          if [ "$CURRENT_ARN" = $ROLE_ARN ]; then
             echo "No ARN changes detected."
             echo "arn_changes=false" >> $GITHUB_OUTPUT
           else
