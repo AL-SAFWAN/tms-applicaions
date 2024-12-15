@@ -23,12 +23,12 @@ jobs:
         with:
           terraform_version: 1.5.0
 
-      - name: Terraform Init
-        run: |
-          cd infra/terraform/environments/prod
-          terraform init
-
       - name: Terraform Apply
         run: |
           cd infra/terraform/environments/prod
           terraform apply -auto-approve
+
+      - name: Terraform Output
+        run: |
+          cd infra/terraform/environments/prod
+          terraform output -json > tf_output.json

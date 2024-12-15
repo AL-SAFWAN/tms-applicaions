@@ -43,6 +43,7 @@ resource "aws_eks_cluster" "eks" {
   ]
 }
 
+## IAM Role for EKS nodes
 resource "aws_iam_role" "nodes" {
   name = "${var.environment}-${var.eks_name}-eks-nodes"
 
