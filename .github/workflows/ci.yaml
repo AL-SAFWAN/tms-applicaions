@@ -80,6 +80,7 @@ jobs:
             echo "ARN changed. Updating values.yaml."
             yq -i '.serviceAccount.annotations."eks.amazonaws.com/role-arn" = env(ROLE_ARN)' infra/helm/web-app/environments/prod/values.yaml
             echo "arn_changes=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Commit and push changes
         if: steps.plan.outputs.exitcode == '2'
