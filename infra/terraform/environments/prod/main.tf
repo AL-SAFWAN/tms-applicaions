@@ -41,12 +41,12 @@ resource "helm_release" "argo_cd" {
 }
 
 
-# module "iam_developer" {
-#   source          = "../../modules/iam/iam-dev"
-#   environment     = var.environment
-#   cluster_name    = module.eks.cluster_name
-#   developer_username = "developer"
-# }
+module "iam_developer" {
+  source          = "../../modules/iam/iam-dev"
+  environment     = var.environment
+  cluster_name    = module.eks.cluster_name
+  developer_username = "developer"
+}
 
 module "iam_admin" {
   source        = "../../modules/iam/iam-admin"
