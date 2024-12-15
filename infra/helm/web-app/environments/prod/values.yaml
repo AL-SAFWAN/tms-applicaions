@@ -15,7 +15,6 @@ ingress:
         - path: /
           pathType: Prefix
           service: backend
-
 backend:
   extraEnv:
     - name: POSTGRES_SERVER
@@ -24,4 +23,7 @@ backend:
       value: "5432"
     - name: POSTGRES_DB
       value: "app"
-    # POSTGRES_USER and POSTGRES_PASSWORD is from external Secrets Store CSI
+  # POSTGRES_USER and POSTGRES_PASSWORD is from external Secrets Store CSI
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::381492056121:role/app-tms-eks-myapp-secrets"
