@@ -144,15 +144,6 @@ output "iam_secrets_role_arn" {
   description = "Pass-through output from iam_secrets module"
 }
 
-output "check" {
-  value = "check if commit is made" 
-}
-
-
-
-
-
-
 
 # resource "helm_release" "web-app" {
 #   name      = "web-app-release" # This value becomes .Release.Name in templates
