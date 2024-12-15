@@ -2,6 +2,8 @@ name: CI Terraform
 on:
   push:
     branches: [main]
+    paths:
+      - "infra/**"
 
 permissions:
   contents: write
@@ -14,6 +16,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: eu-west-2
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -28,21 +31,37 @@ jobs:
         working-directory: infra/terraform/environments/prod
         run: terraform init
 
+      - name: Terraform Plan
+        id: plan
+        working-directory: infra/terraform/environments/prod
+        run: |
+          set +e
+          terraform plan -var-file=prod.tfvars -detailed-exitcode
+          CODE=$?
+          set -e
+          echo "exitcode=$CODE" >> $GITHUB_OUTPUT
+      # Exit code 0 if no changes are required.
+      # Exit code 2 if changes are found.
+      # Only proceed if Terraform Plan indicates changes (exit code 2)
       - name: Terraform Apply
+        if: steps.plan.outputs.exitcode == '2'
         working-directory: infra/terraform/environments/prod
         run: terraform apply -var-file=prod.tfvars -auto-approve
 
       - name: Terraform Output
+        if: steps.plan.outputs.exitcode == '2'
         working-directory: infra/terraform/environments/prod
         run: terraform output -json > tf_output.json
 
       - name: Extract IAM Role ARN
+        if: steps.plan.outputs.exitcode == '2'
         working-directory: infra/terraform/environments/prod
         run: |
-          ROLE_ARN=$(jq  '.iam_secrets_role_arn.value' tf_output.json)
+          ROLE_ARN=$(jq '.iam_secrets_role_arn.value' tf_output.json)
           echo "ROLE_ARN=$ROLE_ARN" >> $GITHUB_ENV
 
       - name: Install yq
+        if: steps.plan.outputs.exitcode == '2'
         run: |
           YQ_VERSION="v4.35.1" 
           curl -L "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" -o yq
@@ -50,13 +69,15 @@ jobs:
           sudo mv yq /usr/local/bin/yq
 
       - name: Update values.yaml
+        if: steps.plan.outputs.exitcode == '2'
         run: |
           yq -i '.serviceAccount.annotations."eks.amazonaws.com/role-arn" = env(ROLE_ARN)' infra/helm/web-app/environments/prod/values.yaml
 
       - name: Commit and push changes
+        if: steps.plan.outputs.exitcode == '2'
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add infra/helm/web-app/environments/prod/values.yaml
-          git commit -m "Update IAM Role ARN in values.yaml"
+          git commit -m "Detected change in infra. Update IAM Role ARN in values.yaml"
           git push
