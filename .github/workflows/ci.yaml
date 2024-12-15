@@ -1,0 +1,41 @@
+name: CI Terraform
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  id-token: write # Required for OIDC
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: eu-west-2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        run: |
+          cd infra/terraform/environments/prod
+          terraform init
+
+      - name: Terraform Apply
+        run: |
+          cd infra/terraform/environments/prod
+          terraform apply -auto-approve
+
+      - name: Terraform Output
+        run: |
+          cd infra/terraform/environments/prod
+          terraform output -json > tf_output.json
