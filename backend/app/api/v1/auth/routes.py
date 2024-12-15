@@ -53,23 +53,23 @@ def login(
         response.set_cookie(
             key="access_token",
             value=access_token,
-            max_age=3600,  # 1 hour
-            expires=3600,  # 1 hour
-            httponly=True,  # Prevent JavaScript access
-            secure=True,  # Required for HTTPS
-            samesite="none",  # Required for cross-origin requests
-            domain=".tms-applications.com",  # Set cookie for main domain
+            max_age=3600,
+            expires=3600,
+            httponly=True,
+            secure=True,
+            samesite="none",
+            domain=".tms-applications.com",
         )
     else:
         response.set_cookie(
             key="access_token",
             value=access_token,
-            max_age=3600,  # 1 hour
-            expires=3600,  # 1 hour
-            httponly=True,  # Prevent JavaScript access
+            max_age=3600,
+            expires=3600,
+            httponly=True,
             # local
-            secure=False,  # Only for HTTPS
-            samesite="lax",  # Adjust based on your needs
+            secure=False,
+            samesite="lax",
         )
 
     return user
@@ -113,13 +113,23 @@ def logout(response: Response):
     """
     Logout the user by removing the access_token cookie.
     """
-    response.delete_cookie(
-        key="access_token",
-        # httponly=True,
-        # secure=False,  # Set to True in production with HTTPS
-        # samesite="lax",  # Should match the same settings used during login
-        # path="/",  # Ensure the path matches where the cookie was set
-    )
+
+    if settings.ENVIRONMENT == "production":
+        response.delete_cookie(
+            key="access_token",
+            httponly=True,
+            secure=True,
+            samesite="none",
+            domain=".tms-applications.com",
+        )
+    else:
+        response.delete_cookie(
+            key="access_token",
+            httponly=True,
+            secure=False,
+            samesite="lax",
+        )
+
     return Message(message="Successfully logged out.")
 
 
@@ -204,29 +214,3 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
     session.commit()
     session.refresh(user)
     return Message(message="Password updated successfully")
-
-
-# @router.post(
-#     "/password-recovery-html-content/{email}",
-#     dependencies=[Depends(get_current_active_superuser)],
-#     response_class=HTMLResponse,
-# )
-# def recover_password_html_content(email: str, session: SessionDep) -> Any:
-#     """
-#     HTML Content for Password Recovery
-#     """
-#     user = user_operations.get_user_by_email(session=session, email=email)
-
-#     if not user:
-#         raise HTTPException(
-#             status_code=404,
-#             detail="The user with this username does not exist in the system.",
-#         )
-#     password_reset_token = generate_password_reset_token(email=email)
-#     email_data = generate_reset_password_email(
-#         email_to=user.email, email=email, token=password_reset_token
-#     )
-
-#     return HTMLResponse(
-#         content=email_data.html_content, headers={"subject:": email_data.subject}
-#     )
