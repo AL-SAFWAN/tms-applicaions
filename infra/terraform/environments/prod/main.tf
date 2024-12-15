@@ -23,6 +23,17 @@ module "eks" {
 }
 
 
+
+resource "helm_release" "argo_cd" {
+  name       = "argo-cd"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  namespace  = "argocd"
+  create_namespace = true
+  version    = "7.3.11"
+}
+
+
 module "iam_developer" {
   source          = "../../modules/iam/iam-dev"
   environment     = var.environment
@@ -55,8 +66,37 @@ module "iam_secrets" {
   service_account_name = "myapp" 
 }
 
+module "iam_external_dns" {
+  source = "../../modules/iam/iam-external-dns"
+  environment = var.environment
+  cluster_name = module.eks.cluster_name
 
+  federated_identity_arn = module.eks.federated_identity_arn
+  federated_identity_url = module.eks.federated_identity_url
+}
+resource "helm_release" "external_dns" {
+  name       = "external-dns"
+  repository = "https://kubernetes-sigs.github.io/external-dns/"
+  chart      = "external-dns"
+  namespace  = "kube-system"
+  version    = "1.15.0"
 
+  # Values could reference the module.iam_external_dns.role_arn if you're passing through helm values
+  values = [
+    jsonencode({
+      serviceAccount = {
+        annotations = {
+          "eks.amazonaws.com/role-arn" = module.iam_external_dns.role_arn,
+        }
+        create = true
+        name   = "external-dns"
+      }
+
+      provider = "aws"
+      # domainFilter, etc. if needed
+    })
+  ]
+}
 data "aws_secretsmanager_secret_version" "creds" {
   secret_id = "db-cred"
 }
@@ -78,125 +118,136 @@ module "db" {
   db_password     = local.db_cred.password
 }
 
-
-
-resource "helm_release" "web-app" {
-  name      = "web-app-release" # This value becomes .Release.Name in templates
-  chart     = "../../../helm/web-app" # This is the path to the chart directory
-  namespace = "kube-system"
-  timeout   = 300 # 5 minute timeout
-  wait      = true
-
-  values = [
-    file("${path.module}/../../../helm/web-app/values.yaml"),
-    jsonencode({
-      ingress = {
-        enabled = true
-        hosts = [
-          {
-            host = local.full_domain
-            paths = [
-              {
-                path = "/"
-                pathType = "Prefix"
-                service = "frontend"
-              }
-            ]
-          },
-          {
-            host = local.api_full_domain
-            paths = [
-              {
-                path = "/"
-                pathType = "Prefix"
-                service = "backend"
-              }
-            ]
-          }
-        ]
-      },
-      serviceAccount = {
-        create = true
-        name   = "myapp"
-        annotations = {
-          "eks.amazonaws.com/role-arn" = module.iam_secrets.role_arn
-        }
-      },
-      backend = {
-        extraEnv = [
-          {
-            name  = "POSTGRES_SERVER"
-            value = replace(module.db.db_endpoint, ":5432", "") 
-          },
-          {
-            name  = "POSTGRES_PORT"
-            value = tostring(module.db.db_port)
-          },
-          {
-            name  = "POSTGRES_DB"
-            value = module.db.db_name
-          },
-          # {
-          #   name  = "POSTGRES_USER"
-          #   value = aws_db_instance.postgres.username
-          # },
-          # {
-          #   name  = "POSTGRES_PASSWORD"
-          #   value = aws_db_instance.postgres.password
-          # }
-        ]
-      }
-    })
-  ]
-
-  depends_on = [
-    helm_release.aws_lbc,
-    helm_release.secrets_csi_driver_aws_provider,
-    helm_release.secrets_csi_driver,
-  ]
-}
-
-
-
-# Retrieve your hosted zone
 data "aws_route53_zone" "selected" {
   name = local.domain_name
 }
 
-
-
-
-data "aws_lb" "ingress_lb" {
-# tags = {
-#     "kubernetes.io/ingress-name" = "kube-system/web-app-release"
-#   }
-depends_on = [
-    helm_release.aws_lbc,     
-    helm_release.web-app,     
-  ]
-}
-
-resource "aws_route53_record" "frontend-domain-record" {
+resource "aws_route53_record" "db_record" {
   zone_id = data.aws_route53_zone.selected.zone_id
-  name    = local.full_domain
+  name    = "db.${var.environment}.${local.domain_name}"
   type    = "CNAME"
   ttl     = 300
-  
-  records = [data.aws_lb.ingress_lb.dns_name]
-  depends_on = [
-    data.aws_lb.ingress_lb
-  ]
+  records = [module.db.db_endpoint]
 }
 
-resource "aws_route53_record" "backend-domain-record" {
-  zone_id = data.aws_route53_zone.selected.zone_id
-  name    = local.api_full_domain
-  type    = "CNAME"
-  ttl     = 300
 
-records = [data.aws_lb.ingress_lb.dns_name]
-  depends_on = [
-    data.aws_lb.ingress_lb
-  ]
+# resource "helm_release" "web-app" {
+#   name      = "web-app-release" # This value becomes .Release.Name in templates
+#   chart     = "../../../helm/web-app" # This is the path to the chart directory
+#   namespace = "kube-system"
+#   timeout   = 300 # 5 minute timeout
+#   wait      = true
+
+#   values = [
+#     file("${path.module}/../../../helm/web-app/values.yaml"),
+#     jsonencode({
+#       ingress = {
+#         enabled = true
+#         hosts = [
+#           {
+#             host = local.full_domain
+#             paths = [
+#               {
+#                 path = "/"
+#                 pathType = "Prefix"
+#                 service = "frontend"
+#               }
+#             ]
+#           },
+#           {
+#             host = local.api_full_domain
+#             paths = [
+#               {
+#                 path = "/"
+#                 pathType = "Prefix"
+#                 service = "backend"
+#               }
+#             ]
+#           }
+#         ]
+#       },
+#       serviceAccount = {
+#         create = true
+#         name   = "myapp"
+#         annotations = {
+#           "eks.amazonaws.com/role-arn" = module.iam_secrets.role_arn
+#         }
+#       },
+#       backend = {
+#         extraEnv = [
+#           {
+#             name  = "POSTGRES_SERVER"
+#             value = replace(module.db.db_endpoint, ":5432", "") 
+#           },
+#           {
+#             name  = "POSTGRES_PORT"
+#             value = tostring(module.db.db_port)
+#           },
+#           {
+#             name  = "POSTGRES_DB"
+#             value = module.db.db_name
+#           },
+#           # {
+#           #   name  = "POSTGRES_USER"
+#           #   value = aws_db_instance.postgres.username
+#           # },
+#           # {
+#           #   name  = "POSTGRES_PASSWORD"
+#           #   value = aws_db_instance.postgres.password
+#           # }
+#         ]
+#       }
+#     })
+#   ]
+
+#   depends_on = [
+#     helm_release.aws_lbc,
+#     helm_release.secrets_csi_driver_aws_provider,
+#     helm_release.secrets_csi_driver,
+#   ]
+# }
+
+
+
+# Retrieve your hosted zone
+# data "aws_route53_zone" "selected" {
+#   name = local.domain_name
+# }
+
+
+
+
+# data "aws_lb" "ingress_lb" {
+# # tags = {
+# #     "kubernetes.io/ingress-name" = "kube-system/web-app-release"
+# #   }
+# depends_on = [
+#     helm_release.aws_lbc,     
+#     helm_release.web-app,     
+#   ]
+# }
+
+# resource "aws_route53_record" "frontend-domain-record" {
+#   zone_id = data.aws_route53_zone.selected.zone_id
+#   name    = local.full_domain
+#   type    = "CNAME"
+#   ttl     = 300
   
-}
+#   records = [data.aws_lb.ingress_lb.dns_name]
+#   depends_on = [
+#     data.aws_lb.ingress_lb
+#   ]
+# }
+
+# resource "aws_route53_record" "backend-domain-record" {
+#   zone_id = data.aws_route53_zone.selected.zone_id
+#   name    = local.api_full_domain
+#   type    = "CNAME"
+#   ttl     = 300
+
+# records = [data.aws_lb.ingress_lb.dns_name]
+#   depends_on = [
+#     data.aws_lb.ingress_lb
+#   ]
+  
+# }

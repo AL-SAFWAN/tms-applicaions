@@ -135,13 +135,14 @@ ingress:
     alb.ingress.kubernetes.io/healthcheck-path: /health
     alb.ingress.kubernetes.io/manage-backend-security-group-rules: "true" # Ensure security group cleanup
     alb.ingress.kubernetes.io/load-balancer-attributes: "deletion_protection.enabled=false" # Allow LB deletion
+    external-dns.alpha.kubernetes.io/hostname: "app.tms-applications.com,api.app.tms-applications.com"
   hosts:
-    - host: local.tms-applications.com
+    - host: app.tms-applications.com
       paths:
         - path: /
           pathType: Prefix
           service: frontend
-    - host: api.local.tms-applications.com
+    - host: api.app.tms-applications.com
       paths:
         - path: /
           pathType: Prefix

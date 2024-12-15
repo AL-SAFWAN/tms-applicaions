@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: web-app-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/AL-SAFWAN/tms-applicaions.git"
+    path: "infra/helm/web-app"
+    targetRevision: HEAD
+    helm:
+      releaseName: web-app-release
+      # Reference prod values
+      valueFiles:
+        - ../../../app-config/prod/values.yaml
+  destination:
+    namespace: kube-system
+    server: "https://kubernetes.default.svc"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
