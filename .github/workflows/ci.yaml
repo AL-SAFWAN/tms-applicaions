@@ -68,10 +68,18 @@ jobs:
           chmod +x yq
           sudo mv yq /usr/local/bin/yq
 
-      - name: Update values.yaml
+      - name: Compare ARNs and Conditionally Update Values.yaml
         if: steps.plan.outputs.exitcode == '2'
+        id: compareARNs
         run: |
-          yq -i '.serviceAccount.annotations."eks.amazonaws.com/role-arn" = env(ROLE_ARN)' infra/helm/web-app/environments/prod/values.yaml
+          CURRENT_ARN=$(yq '.serviceAccount.annotations."eks.amazonaws.com/role-arn"' infra/helm/web-app/environments/prod/values.yaml)
+          if [ "$CURRENT_ARN" = "$ROLE_ARN" ]; then
+            echo "No ARN changes detected."
+            echo "arn_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "ARN changed. Updating values.yaml."
+            yq -i '.serviceAccount.annotations."eks.amazonaws.com/role-arn" = env(ROLE_ARN)' infra/helm/web-app/environments/prod/values.yaml
+            echo "arn_changes=true" >> $GITHUB_OUTPUT
 
       - name: Commit and push changes
         if: steps.plan.outputs.exitcode == '2'
