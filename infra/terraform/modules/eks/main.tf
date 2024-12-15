@@ -43,6 +43,32 @@ resource "aws_eks_cluster" "eks" {
   ]
 }
 
+# github action role attached to eks
+data "aws_secretsmanager_secret_version" "github" {
+  secret_id = "github" 
+}
+locals {
+   github_arn = jsondecode(
+    data.aws_secretsmanager_secret_version.github.secret_string
+  )
+}
+
+resource "kubernetes_config_map" "aws_auth" {
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
+  }
+
+  data = {
+    mapRoles = <<-EOF
+      - rolearn: ${local.github_arn.github-action}
+        username: github-action
+        groups:
+          - system:masters
+    EOF
+  }
+}
+
 # IAM Role for EKS nodes
 resource "aws_iam_role" "nodes" {
   name = "${var.environment}-${var.eks_name}-eks-nodes"
