@@ -34,7 +34,7 @@ jobs:
       - name: Terraform Apply
         run: |
           cd infra/terraform/environments/prod
-          terraform apply -auto-approve
+          terraform apply -var-file=prod.tfvars -auto-approve
 
       - name: Terraform Output
         run: |
