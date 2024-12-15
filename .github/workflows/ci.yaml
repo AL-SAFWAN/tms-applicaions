@@ -42,7 +42,7 @@ jobs:
       - name: Extract IAM Role ARN
         working-directory: infra/terraform/environments/prod
         run: |
-          cat tf_output.json
+          cat tf_output.json | jq -r '.iam_secrets_role_arn.value'
           ROLE_ARN=$(jq -r '.iam_secrets_role_arn.value' tf_output.json)
           echo "ROLE_ARN=$ROLE_ARN" >> $GITHUB_ENV
 
