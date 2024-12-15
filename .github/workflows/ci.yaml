@@ -72,9 +72,11 @@ jobs:
         if: steps.plan.outputs.exitcode == '2'
         id: compareARNs
         run: |
-          CURRENT_ARN=$(yq -r '.serviceAccount.annotations."eks.amazonaws.com/role-arn"' infra/helm/web-app/environments/prod/values.yaml)
-          echo $CURRENT_ARN
-          if [ "$CURRENT_ARN" = $ROLE_ARN ]; then
+          CURRENT_ARN=$(yq '.serviceAccount.annotations."eks.amazonaws.com/role-arn"' infra/helm/web-app/environments/prod/values.yaml)
+          echo "CURRENT_ARN=$CURRENT_ARN"
+          echo "ROLE_ARN=$ROLE_ARN"
+
+          if [ "$CURRENT_ARN" = "$ROLE_ARN" ]; then
             echo "No ARN changes detected."
             echo "arn_changes=false" >> $GITHUB_OUTPUT
           else
