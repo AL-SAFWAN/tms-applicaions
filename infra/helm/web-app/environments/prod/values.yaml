@@ -18,7 +18,7 @@ ingress:
 backend:
   extraEnv:
     - name: POSTGRES_SERVER
-      value: app-tms-eks-postgres
+      value: app-tms-eks-postgres.czcom40qetd2.eu-west-2.rds.amazonaws.com
     - name: POSTGRES_PORT
       value: "5432"
     - name: POSTGRES_DB

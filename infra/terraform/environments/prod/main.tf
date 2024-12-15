@@ -125,6 +125,7 @@ module "db" {
   db_password     = local.db_cred.password
 }
 
+
 data "aws_route53_zone" "selected" {
   name = local.domain_name
 }
