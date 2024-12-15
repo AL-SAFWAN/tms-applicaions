@@ -1,7 +1,0 @@
-{
-  "iam_secrets_role_arn": {
-    "sensitive": false,
-    "type": "string",
-    "value": "arn:aws:iam::381492056121:role/app-tms-eks-myapp-secrets"
-  }
-}

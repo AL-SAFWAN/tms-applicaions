@@ -37,6 +37,12 @@ jobs:
         run: |
           cd infra/terraform/environments/prod
           terraform output -json > tf_output.json
+      - name: Debug tf_output.json
+        run: |
+          cd infra/terraform/environments/prod
+          cat tf_output.json
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Extract IAM Role ARN
         run: |
