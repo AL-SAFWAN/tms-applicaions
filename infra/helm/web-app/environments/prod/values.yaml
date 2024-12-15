@@ -26,4 +26,4 @@ backend:
       # POSTGRES_USER and POSTGRES_PASSWORD is from external Secrets Store CSI
 serviceAccount:
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::381492056121:role/check-change"
+    eks.amazonaws.com/role-arn: "arn:aws:iam::381492056121:role/app-tms-eks-myapp-secrets"
