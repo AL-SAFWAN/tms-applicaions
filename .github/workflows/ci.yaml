@@ -22,6 +22,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.0
+          terraform_wrapper: false
 
       - name: Terraform Init
         working-directory: infra/terraform/environments/prod
@@ -31,14 +32,22 @@ jobs:
         working-directory: infra/terraform/environments/prod
         run: terraform apply -var-file=prod.tfvars -auto-approve
 
-      - name: Extract IAM Role ARN directly
+      - name: Terraform Output
+        working-directory: infra/terraform/environments/prod
+        run: terraform output -json > tf_output.json
+
+      - name: Extract IAM Role ARN
         working-directory: infra/terraform/environments/prod
         run: |
-          ROLE_ARN=$(terraform output -raw iam_secrets_role_arn)
+          ROLE_ARN=$(jq  '.iam_secrets_role_arn.value' tf_output.json)
           echo "ROLE_ARN=$ROLE_ARN" >> $GITHUB_ENV
 
       - name: Install yq
-        run: sudo apt-get update && sudo apt-get install -y yq
+        run: |
+          YQ_VERSION="v4.35.1" 
+          curl -L "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" -o yq
+          chmod +x yq
+          sudo mv yq /usr/local/bin/yq
 
       - name: Update values.yaml
         run: |
