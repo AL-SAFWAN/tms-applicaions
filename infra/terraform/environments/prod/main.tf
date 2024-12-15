@@ -61,7 +61,7 @@ resource "helm_release" "updater" {
   values = [
     file("${path.module}/../../../helm/image-updater/values.yaml"),
   ]
-  depends_on = [helm_release.argocd]
+  depends_on = [helm_release.argo_cd]
 }
 
 module "iam_developer" {

@@ -33,11 +33,12 @@ jobs:
         run: |
           # Use short commit SHA for versioning
           COMMIT_SHORT=$(echo $GITHUB_SHA | cut -c1-7)
-          docker build -t $FRONTEND_IMAGE:latest -t $FRONTEND_IMAGE:$COMMIT_SHORT frontend/
+          docker build --build-arg NEXT_PUBLIC_BACKEND_URL=https://api.app.tms-applications.com -t $FRONTEND_IMAGE:latest -t $FRONTEND_IMAGE:$COMMIT_SHORT frontend/
 
       - name: Push Frontend Image
         run: |
           COMMIT_SHORT=$(echo $GITHUB_SHA | cut -c1-7)
+
           docker push $FRONTEND_IMAGE:latest
           docker push $FRONTEND_IMAGE:$COMMIT_SHORT
 
