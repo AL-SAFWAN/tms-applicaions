@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write # Required for OIDC
 
 jobs:
   terraform:
@@ -24,29 +25,24 @@ jobs:
           terraform_version: 1.5.0
 
       - name: Terraform Init
-        run: |
-          cd infra/terraform/environments/prod
-          terraform init
+        working-directory: infra/terraform/environments/prod
+        run: terraform init
 
       - name: Terraform Apply
-        run: |
-          cd infra/terraform/environments/prod
-          terraform apply -var-file=prod.tfvars -auto-approve
+        working-directory: infra/terraform/environments/prod
+        run: terraform apply -var-file=prod.tfvars -auto-approve
 
       - name: Terraform Output
-        run: |
-          cd infra/terraform/environments/prod
-          terraform output -json > tf_output.json
-      - name: Debug tf_output.json
-        run: |
-          cd infra/terraform/environments/prod
-          cat tf_output.json
+        working-directory: infra/terraform/environments/prod
+        run: terraform output -json > tf_output.json
+
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Extract IAM Role ARN
+        working-directory: infra/terraform/environments/prod
         run: |
-          cd infra/terraform/environments/prod
+          cat tf_output.json
           ROLE_ARN=$(jq -r '.iam_secrets_role_arn.value' tf_output.json)
           echo "ROLE_ARN=$ROLE_ARN" >> $GITHUB_ENV
 
