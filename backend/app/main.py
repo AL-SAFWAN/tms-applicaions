@@ -35,7 +35,7 @@ if settings.all_cors_origins:
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
-@app.get("/test", tags=["test"])
+@app.get("/test-again", tags=["test"])
 async def test() -> bool:
     return settings
 
