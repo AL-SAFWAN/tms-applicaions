@@ -70,11 +70,6 @@ spec:
                 secretKeyRef:
                   name: myapp-k8s-secret
                   key: k8s-mypassword
-            - name: SMTP_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: myapp-k8s-secret
-                  key: k8s-mysmtp-password
             {{- with .Values.backend.env }}
             {{ toYaml . | nindent 12 }}
             {{- end }}
