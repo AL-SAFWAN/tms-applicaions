@@ -21,9 +21,6 @@ app = FastAPI(
     generate_unique_id_function=custom_generate_unique_id,
 )
 
-logging.info(f"Allowed CORS origins: {settings.all_cors_origins}")
-logging.info(f"Allowed CORS origins: {settings.BACKEND_CORS_ORIGINS}")
-logging.info(f"HELLO WOLRD")
 if settings.all_cors_origins:
     app.add_middleware(
         CORSMiddleware,
@@ -33,6 +30,11 @@ if settings.all_cors_origins:
         allow_headers=["*"],
     )
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+
+@app.get("/test", tags=["test"])
+async def test() -> bool:
+    return settings
 
 
 @app.get("/health", tags=["Health Check"])
