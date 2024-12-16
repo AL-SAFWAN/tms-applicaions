@@ -147,7 +147,7 @@ module "db" {
   vpc_id          = module.vpc.vpc_id
   private_subnets = module.vpc.private_subnets
   db_username     = local.db_cred.username
-  db_password     = local.db_cred.pass
+  db_password     = local.db_cred.password
 }
 
 
