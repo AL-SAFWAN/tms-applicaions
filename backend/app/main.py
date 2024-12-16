@@ -43,3 +43,6 @@ async def test() -> bool:
 @app.get("/health", tags=["Health Check"])
 async def health_check() -> bool:
     return True
+
+
+#  all_cors_origins=['http://app.tms-applications.com', 'https://app.tms-applications.com', 'http://localhost:5173']
