@@ -111,13 +111,13 @@ backend:
     - name: FIRST_SUPERUSER
       value: "admin@example.com"
     - name: FIRST_SUPERUSER_PASSWORD
-      value: "admin123" # Change this in production
+      value: "admin123" # [TODO] Change this in production
     - name: SECRET_KEY
-      value: "your-secret-key-here" # Change this in production
+      value: "your-secret-key-here" #[TODO] Change this in production
     - name: SMTP_HOST
-      value: "smtp.zoho.eu"
+      value: "email-smtp.eu-west-2.amazonaws.com"
     - name: SMTP_USER
-      value: "alsafwan.uddin@tms-applications.com"
+      value: "AKIAVRUVS2A43OCJLSPN"
     - name: SMTP_PORT
       value: "587"
     - name: SMTP_SSL
