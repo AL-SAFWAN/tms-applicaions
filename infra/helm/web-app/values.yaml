@@ -5,7 +5,7 @@ frontend:
   image:
     repository: "public.ecr.aws/m8h2m6a1/tms-frontend"
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   service:
     type: ClusterIP
     port: 3000
@@ -50,7 +50,7 @@ backend:
   image:
     repository: "public.ecr.aws/m8h2m6a1/tms-backend"
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   service:
     type: ClusterIP
     port: 8000
