@@ -19,15 +19,7 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
 )
-print(settings.all_cors_origins)
-print(settings.BACKEND_CORS_ORIGINS)
-print(
-    [
-        "http://app.tms-applications.com",
-        "https://app.tms-applications.com",
-    ],
-)
-# Set all CORS enabled origins
+
 if settings.all_cors_origins:
     app.add_middleware(
         CORSMiddleware,

@@ -70,7 +70,7 @@ spec:
                 secretKeyRef:
                   name: myapp-k8s-secret
                   key: k8s-mypassword
-            - name: POSTGRES_PASSWORD
+            - name: SMTP_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: myapp-k8s-secret
