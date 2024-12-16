@@ -4,7 +4,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
-from app.core import operations
+from app.modules.item import operations
 from app.core.config import settings
 from app.core.models import User, UserCreate
 from app.core.security import verify_password
@@ -277,9 +277,7 @@ def test_update_password_me_same_password_error(
     )
     assert r.status_code == 400
     updated_user = r.json()
-    assert (
-        updated_user["detail"] == "New password cannot be the same as the current one"
-    )
+    assert updated_user["detail"] == "New password cannot be the same as the current one"
 
 
 def test_register_user(client: TestClient, db: Session) -> None:
@@ -458,9 +456,7 @@ def test_delete_user_not_found(
 def test_delete_user_current_super_user_error(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
-    super_user = operations.get_user_by_email(
-        session=db, email=settings.FIRST_SUPERUSER
-    )
+    super_user = operations.get_user_by_email(session=db, email=settings.FIRST_SUPERUSER)
     assert super_user
     user_id = super_user.id
 

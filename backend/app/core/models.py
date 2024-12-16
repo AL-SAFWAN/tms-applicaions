@@ -13,8 +13,6 @@ class RoleEnum(str, Enum):
     admin = "admin"
 
 
-# Shared properties from module schema
-# MUST BE MAINTAINED
 class UserBase(SQLModel):
     # User specific information
     email: EmailStr = Field(unique=True, index=True, max_length=255)

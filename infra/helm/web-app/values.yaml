@@ -115,13 +115,17 @@ backend:
     - name: SECRET_KEY
       value: "your-secret-key-here" # Change this in production
     - name: SMTP_HOST
-      value: "mailcatcher"
+      value: "smtp.zoho.eu"
+    - name: SMTP_USER
+      value: "alsafwan.uddin@tms-applications.com"
     - name: SMTP_PORT
-      value: "1025"
+      value: "587"
+    - name: SMTP_SSL
+      value: "False"
     - name: SMTP_TLS
-      value: "false"
+      value: "True"
     - name: EMAILS_FROM_EMAIL
-      value: "noreply@example.com"
+      value: "hello@tms-applications.com"
 
 ingress:
   enabled: true
@@ -162,4 +166,4 @@ serviceAccount:
   create: true
   name: myapp
   annotations:
-    "eks.amazonaws.com/role-arn": "REPLACE_ME"
+    "eks.amazonaws.com/role-arn": "REPLACE_ME" # automatically replaced by argocd and pipeline

@@ -1,7 +1,7 @@
 from sqlmodel import Session, create_engine, select
 
-from app.api.v1.user import operations
-from app.api.v1.user.schemas import UserCreate
+from app.modules.user.infrastructure import repository
+from app.modules.user.domain.models import UserCreate
 from app.core.config import settings
 from app.core.models import RoleEnum, User
 
@@ -35,4 +35,4 @@ def init_db(session: Session) -> None:
             # is_superuser=True,
             role=RoleEnum.admin,
         )
-        user = operations.create_user(session=session, user_create=user_in)
+        user = repository.create_user(session=session, user_in=user_in)

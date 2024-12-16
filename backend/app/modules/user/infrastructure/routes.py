@@ -1,17 +1,15 @@
 import uuid
-from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Date, cast, col, delete, func, select
 
-from app.api.deps import (
+from app.modules.deps import (
     CurrentUser,
     SessionDep,
     get_current_active_superuser,
 )
-from app.api.v1.user import operations
-from app.api.v1.user.schemas import (
+from app.modules.user.infrastructure import repository
+from app.modules.user.domain.models import (
     UpdatePassword,
     User,
     UserCreate,
@@ -21,9 +19,10 @@ from app.api.v1.user.schemas import (
     UserUpdateMe,
 )
 from app.core.config import settings
-from app.core.models import Item, Message, RoleEnum
-from app.core.security import get_password_hash, verify_password
-from app.core.utils import generate_new_account_email, send_email
+from app.core.models import Message, RoleEnum
+
+from app.modules.auth.domain import service as auth_service
+from app.modules.email.domain.service import generate_new_account_email, send_email
 
 router = APIRouter()
 
@@ -33,18 +32,11 @@ router = APIRouter()
     dependencies=[Depends(get_current_active_superuser)],
     response_model=list[UserPublic],
 )
-def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+def read_all_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     """
-    Retrieve users.
+    Retrieve all users
     """
-
-    # count_statement = select(func.count()).select_from(User)
-    # count = session.exec(count_statement).one()
-
-    statement = select(User).offset(skip).limit(limit)
-    users = session.exec(statement).all()
-
-    # return UsersPublic(data=users, count=count)
+    users = repository.get_all_users(session=session, skip=skip, limit=limit)
     return users
 
 
@@ -53,70 +45,16 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     dependencies=[Depends(get_current_active_superuser)],
     # response_model=list[dict[str, any]],
 )
-def read_users_infos(session: SessionDep) -> Any:
+def read_users_stats(session: SessionDep) -> Any:
     """
     Retrieve users.
     """
-    three_months_ago = datetime.now(timezone.utc) - timedelta(days=90)
 
-    # # Filter users created in the last 3 months and group by date
-    # statement = (
-    #     select(
-    #         cast(User.created_at, Date).label("date"),  # Group by date only
-    #         func.count(User.id).label("users"),  # Count users per day
-    #     )
-    #     .where(User.created_at >= three_months_ago)
-    #     .group_by(cast(User.created_at, Date))
-    #     .order_by(cast(User.created_at, Date))  # Order by date ascending
-    # )
-
-    # # Execute the statement
-    # results = session.exec(statement).all()
-
-    # # Transform results into the desired format
-    # grouped_data = [{"date": str(row.date), "users": row.users} for row in results]
-    today = datetime.now(timezone.utc)
-
-    # Generate a complete list of dates from 3 months ago to today
-    date_range = [
-        (three_months_ago + timedelta(days=i)).date()
-        for i in range((today - three_months_ago).days + 1)
-    ]
-
-    # Query to get users grouped by date
-    group_statement = (
-        select(
-            cast(User.created_at, Date).label("date"),
-            func.count(User.id).label("users"),
-        )
-        .where(User.created_at >= three_months_ago)
-        .group_by(cast(User.created_at, Date))
-        .order_by(cast(User.created_at, Date))
-    )
-
-    grouped_results = session.exec(group_statement).all()
-
-    # Transform query results into a dictionary for easy merging
-    result_dict = {str(row.date): row.users for row in grouped_results}
-
-    # Fill in missing dates with zero users
-    grouped_data = [
-        {"date": str(date), "users": result_dict.get(str(date), 0)}
-        for date in date_range
-    ]
-
-    count_statement = select(func.count()).select_from(User)
-    total_count = session.exec(count_statement).one()
-
-    # total_statement = select(func.count(User.id)).where(
-    #     User.created_at >= three_months_ago
-    # )
-    # three_month_count = session.exec(total_statement).one()
+    grouped_data, total_count = repository.get_users_stats(session=session)
 
     return {
         "data": grouped_data,
         "total_count": total_count,
-        # "three_month_count": three_month_count,
     }
 
 
@@ -129,19 +67,19 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     """
     Create new user.
     """
-    user = operations.get_user_by_email(session=session, email=user_in.email)
+    user = repository.get_user_by_email(session=session, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
             detail="The user with this email already exists in the system.",
         )
 
-    user = operations.create_user(session=session, user_create=user_in)
+    user = repository.create_user(session=session, user_in=user_in)
     if settings.emails_enabled and user_in.email:
         email_data = generate_new_account_email(
             email_to=user_in.email,
-            username=user_in.email,
-            password=user_in.password,
+            firstName=user_in.first_name,
+            lastName=user_in.last_name,
         )
         send_email(
             email_to=user_in.email,
@@ -160,18 +98,16 @@ def update_user_me(
     """
 
     if user_in.email:
-        existing_user = operations.get_user_by_email(
+        existing_user = repository.get_user_by_email(
             session=session, email=user_in.email
         )
         if existing_user and existing_user.id != current_user.id:
             raise HTTPException(
                 status_code=409, detail="User with this email already exists"
             )
-    user_data = user_in.model_dump(exclude_unset=True)
-    current_user.sqlmodel_update(user_data)
-    session.add(current_user)
-    session.commit()
-    session.refresh(current_user)
+    current_user = repository.update_me(
+        session=session, user_in=user_in, current_user=current_user
+    )
     return current_user
 
 
@@ -182,17 +118,19 @@ def update_password_me(
     """
     Update own password.
     """
-    if not verify_password(body.current_password, current_user.hashed_password):
+
+    if not auth_service.verify_password(
+        body.current_password, current_user.hashed_password
+    ):
         raise HTTPException(status_code=400, detail="Incorrect password")
     if body.current_password == body.new_password:
         raise HTTPException(
             status_code=400,
             detail="New password cannot be the same as the current one",
         )
-    hashed_password = get_password_hash(body.new_password)
-    current_user.hashed_password = hashed_password
-    session.add(current_user)
-    session.commit()
+    repository.update_me_password(
+        session=session, current_user=current_user, new_password=body.new_password
+    )
     return Message(message="Password updated successfully")
 
 
@@ -209,15 +147,12 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
     Delete own user.
     """
-    if current_user.is_superuser:
+    if current_user.role is RoleEnum.admin:
         raise HTTPException(
             status_code=403,
-            detail="Super users are not allowed to delete themselves",
+            detail="Admin users are not allowed to delete themselves",
         )
-    statement = delete(Item).where(col(Item.owner_id) == current_user.id)
-    session.exec(statement)  # type: ignore
-    session.delete(current_user)
-    session.commit()
+    repository.delete_me(session=session, current_user=current_user)
     return Message(message="User deleted successfully")
 
 
@@ -226,14 +161,13 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     """
     Create new user without the need to be logged in.
     """
-    user = operations.get_user_by_email(session=session, email=user_in.email)
+    user = repository.get_user_by_email(session=session, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
             detail="The user with this email already exists in the system",
         )
-    user_create = UserCreate.model_validate(user_in)
-    user = operations.create_user(session=session, user_create=user_create)
+    user = repository.create_user(session=session, user_in=user_in)
     return user
 
 
@@ -247,7 +181,7 @@ def read_user_by_id(
     user = session.get(User, user_id)
     if user == current_user:
         return user
-    if not current_user.is_superuser:
+    if current_user.role is not RoleEnum.admin:
         raise HTTPException(
             status_code=403,
             detail="The user doesn't have enough privileges",
@@ -277,7 +211,7 @@ def update_user(
             detail="The user with this id does not exist in the system",
         )
     if user_in.email:
-        existing_user = operations.get_user_by_email(
+        existing_user = repository.get_user_by_email(
             session=session, email=user_in.email
         )
         if existing_user and existing_user.id != user_id:
@@ -290,7 +224,7 @@ def update_user(
                 status_code=409,
                 detail="Admin users are not allow to deactivate themselves",
             )
-    db_user = operations.update_user(session=session, db_user=db_user, user_in=user_in)
+    db_user = repository.update_user(session=session, db_user=db_user, user_in=user_in)
     return db_user
 
 
@@ -309,8 +243,5 @@ def delete_user(
             status_code=403,
             detail="Admin users are not allowed to delete themselves",
         )
-    statement = delete(Item).where(col(Item.owner_id) == user_id)
-    session.exec(statement)  # type: ignore
-    session.delete(user)
-    session.commit()
+    repository.delete_user(session=session, user=user)
     return Message(message="User deleted successfully")

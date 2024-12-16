@@ -33,6 +33,11 @@ spec:
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           command: ["bash", "scripts/prestart.sh"]
           env:
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: myapp-k8s-secret
+                  key: k8s-smtp-password
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:

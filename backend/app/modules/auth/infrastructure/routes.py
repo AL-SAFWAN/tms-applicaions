@@ -1,21 +1,19 @@
-from datetime import timedelta
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.api.deps import CurrentUser, SessionDep
-from app.api.v1.auth import operations
-from app.api.v1.auth.schemas import NewPassword, Token
-from app.api.v1.user import operations as user_operations
-from app.api.v1.user.schemas import UserCreate, UserPublic
-from app.core import security
+from app.modules.deps import CurrentUser, SessionDep
+from app.modules.auth.domain import service
+
+from app.modules.auth.domain.models import NewPassword, Token
+from app.modules.user.infrastructure import repository as user_repository
+
+from app.modules.user.domain.models import UserCreate, UserPublic
 from app.core.config import settings
 from app.core.models import Message
 
-# from fastapi.responses import HTMLResponse
-from app.core.security import get_password_hash
-from app.core.utils import (
+from app.modules.email.domain.service import (
     generate_new_account_email,
     generate_password_reset_token,
     generate_reset_password_email,
@@ -35,7 +33,7 @@ def login(
     """
     OAuth2 compatible token login, get an access token for future requests
     """
-    user = operations.authenticate(
+    user = service.authenticate_user(
         session=session, email=form_data.username, password=form_data.password
     )
 
@@ -44,10 +42,7 @@ def login(
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = security.create_access_token(
-        user.id, user.role, expires_delta=access_token_expires
-    )
+    access_token = service.create_access_token_for_user(user_id=user.id, role=user.role)
 
     if settings.ENVIRONMENT == "production":
         response.set_cookie(
@@ -67,7 +62,6 @@ def login(
             max_age=3600,
             expires=3600,
             httponly=True,
-            # local
             secure=False,
             samesite="lax",
         )
@@ -77,7 +71,6 @@ def login(
 
 @router.post("/login/access-token")
 def login_access_token(
-    response: Response,
     session: SessionDep,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
@@ -85,18 +78,16 @@ def login_access_token(
     OAuth2 compatible token login, get an access token for future requests
     """
 
-    user = operations.authenticate(
+    user = service.authenticate_user(
         session=session, email=form_data.username, password=form_data.password
     )
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = security.create_access_token(
-        user.id, user.role, expires_delta=access_token_expires
-    )
-    response.set_cookie(key="access_token", value=access_token)
+
+    access_token = service.create_access_token_for_user(user_id=user.id, role=user.role)
+
     return Token(access_token=access_token)
 
 
@@ -141,14 +132,14 @@ def create_account(response: Response, session: SessionDep, user_in: UserCreate)
     """
     Create an Account
     """
-    user = user_operations.get_user_by_email(session=session, email=user_in.email)
+    user = user_repository.get_user_by_email(session=session, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
             detail="The user with this email already exists in the system.",
         )
 
-    user = user_operations.create_user(session=session, user_create=user_in)
+    user = user_repository.create_user(session=session, user_in=user_in)
     if settings.emails_enabled and user_in.email:
         email_data = generate_new_account_email(
             email_to=user_in.email,
@@ -160,11 +151,31 @@ def create_account(response: Response, session: SessionDep, user_in: UserCreate)
             subject=email_data.subject,
             html_content=email_data.html_content,
         )
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = security.create_access_token(
-        user.id, user.role, expires_delta=access_token_expires
-    )
-    response.set_cookie(key="access_token", value=access_token)
+
+    access_token = service.create_access_token_for_user(user_id=user.id, role=user.role)
+
+    if settings.ENVIRONMENT == "production":
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            max_age=3600,
+            expires=3600,
+            httponly=True,
+            secure=True,
+            samesite="none",
+            domain=".tms-applications.com",
+        )
+    else:
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            max_age=3600,
+            expires=3600,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+        )
+
     return user
 
 
@@ -173,7 +184,7 @@ def recover_password(email: str, session: SessionDep) -> Message:
     """
     Password Recovery
     """
-    user = user_operations.get_user_by_email(session=session, email=email)
+    user = user_repository.get_user_by_email(session=session, email=email)
 
     if not user:
         raise HTTPException(
@@ -200,7 +211,7 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
     email = verify_password_reset_token(token=body.token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid token")
-    user = user_operations.get_user_by_email(session=session, email=email)
+    user = user_repository.get_user_by_email(session=session, email=email)
     if not user:
         raise HTTPException(
             status_code=404,
@@ -208,9 +219,9 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
         )
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
-    hashed_password = get_password_hash(password=body.password)
-    user.hashed_password = hashed_password
-    session.add(user)
-    session.commit()
-    session.refresh(user)
+
+    user_repository.update_me_password(
+        session=session, current_user=user, new_password=body.password
+    )
+
     return Message(message="Password updated successfully")

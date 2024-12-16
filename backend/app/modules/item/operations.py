@@ -2,7 +2,7 @@ import uuid
 
 from sqlmodel import Session
 
-from app.api.v1.item.schemas import ItemCreate
+from app.modules.item.schemas import ItemCreate
 from app.core.models import Item
 
 

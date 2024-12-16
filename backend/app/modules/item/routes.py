@@ -4,8 +4,8 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from sqlmodel import func, select
 
-from app.api.deps import CurrentUser, SessionDep
-from app.api.v1.item.schemas import (
+from app.modules.deps import CurrentUser, SessionDep
+from app.modules.item.schemas import (
     Item,
     ItemCreate,
     ItemPublic,
