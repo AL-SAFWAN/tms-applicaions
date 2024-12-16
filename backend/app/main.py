@@ -1,4 +1,5 @@
 import sentry_sdk
+import logging
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
@@ -21,6 +22,7 @@ app = FastAPI(
 )
 
 if settings.all_cors_origins:
+    logging.info(f"Allowed CORS origins: {settings.all_cors_origins}")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.all_cors_origins,
