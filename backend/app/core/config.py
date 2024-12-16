@@ -9,21 +9,18 @@ from pydantic import (
     PostgresDsn,
     computed_field,
     model_validator,
-    Field,
-    field_validator,
 )
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
 
-def parse_cors(value: str | list[str]) -> list[str]:
-    if isinstance(value, str):
-        return [origin.strip() for origin in value.split(",")]
-    elif isinstance(value, list):
-        return value
-    else:
-        raise ValueError("Invalid CORS origins")
+def parse_cors(v: Any) -> list[str] | str:
+    if isinstance(v, str) and not v.startswith("["):
+        return [i.strip() for i in v.split(",")]
+    elif isinstance(v, list | str):
+        return v
+    raise ValueError(v)
 
 
 class Settings(BaseSettings):
@@ -40,17 +37,12 @@ class Settings(BaseSettings):
     FRONTEND_HOST: str = "http://localhost:5173"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
-    BACKEND_CORS_ORIGINS: list[str] = Field(default_factory=list)
-
-    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v):
-        return parse_cors(v)
+    BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def all_cors_origins(self) -> list[str]:
-        return [origin.rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
+        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
             self.FRONTEND_HOST
         ]
 
