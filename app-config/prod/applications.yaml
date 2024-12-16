@@ -3,7 +3,6 @@ kind: Application
 metadata:
   name: web-app-prod
   namespace: argocd
-  metadata:
   annotations:
     argocd-image-updater.argoproj.io/write-back-method: git
     argocd-image-updater.argoproj.io/image-list: "frontend=public.ecr.aws/m8h2m6a1/tms-frontend,backend=public.ecr.aws/m8h2m6a1/tms-backend"
