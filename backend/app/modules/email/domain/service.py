@@ -44,6 +44,7 @@ def send_email(
         "tls": settings.SMTP_TLS,
         "ssl": settings.SMTP_SSL,
     }
+    print(settings.BACKEND_CORS_ORIGINS)
     if settings.SMTP_TLS:
         smtp_options["tls"] = True
     elif settings.SMTP_SSL:

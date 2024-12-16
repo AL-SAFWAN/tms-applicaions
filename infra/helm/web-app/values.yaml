@@ -103,7 +103,7 @@ backend:
     - name: ENVIRONMENT
       value: "local"
     - name: BACKEND_CORS_ORIGINS
-      value: "http://app.tms-application.com,https://app.tms-application.com"
+      value: "'http://app.tms-application.com,https://app.tms-application.com'"
     - name: FIRST_SUPERUSER_FIRSTNAME
       value: "Admin"
     - name: FIRST_SUPERUSER_LASTNAME
