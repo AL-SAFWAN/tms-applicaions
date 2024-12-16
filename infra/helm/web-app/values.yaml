@@ -103,7 +103,7 @@ backend:
     - name: ENVIRONMENT
       value: "local"
     - name: BACKEND_CORS_ORIGINS
-      value: "'http://app.tms-application.com,https://app.tms-application.com'"
+      value: "http://app.tms-applications.com,https://app.tms-applications.com"
     - name: FIRST_SUPERUSER_FIRSTNAME
       value: "Admin"
     - name: FIRST_SUPERUSER_LASTNAME
@@ -111,9 +111,9 @@ backend:
     - name: FIRST_SUPERUSER
       value: "admin@example.com"
     - name: FIRST_SUPERUSER_PASSWORD
-      value: "admin123" # [TODO] Change this in production
+      value: "admin123" # TODO Change this in production
     - name: SECRET_KEY
-      value: "your-secret-key-here" #[TODO] Change this in production
+      value: "your-secret-key-here" #TODO Change this in production
     - name: SMTP_HOST
       value: "email-smtp.eu-west-2.amazonaws.com"
     - name: SMTP_USER

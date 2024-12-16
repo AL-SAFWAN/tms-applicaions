@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-// import GridPanel from "@/components/PanelLayout"; [TODO remove from app]
+// import GridPanel from "@/components/PanelLayout"; TODO remove from app
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 
