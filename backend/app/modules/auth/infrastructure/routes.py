@@ -21,6 +21,7 @@ from app.modules.email.domain.service import (
     verify_password_reset_token,
 )
 
+
 router = APIRouter()
 
 

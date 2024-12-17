@@ -1,0 +1,130 @@
+from typing import List
+
+# from uuid import UUID
+from fastapi import APIRouter, Path, Query, HTTPException
+
+from app.modules.deps import SessionDep, CurrentUser
+
+from app.modules.tickets.domain.models import TicketCreate, TicketUpdate, TicketPublic
+from app.core.models import Ticket, StatusEnum, PriorityEnum
+
+from app.modules.tickets.infrastructure import repository
+from app.modules.tickets.domain import services
+
+
+router = APIRouter()
+
+
+@router.get("/", response_model=List[TicketPublic])
+def list_tickets(
+    session: SessionDep,
+    current_user: CurrentUser,
+    status: StatusEnum | None = Query(None, description="Filter by ticket status"),
+    priority: PriorityEnum | None = Query(None, description="Filter by ticket status"),
+    assigned: bool = Query(
+        False, description="Filter tickets assigned to current agent"
+    ),
+) -> List[TicketPublic]:
+    """
+    List tickets.
+    - Requesters: List only their own tickets.
+    - Agents: List all tickets  and assigned.
+    - Admin: List all tickets.
+    """
+
+    if current_user.role == "requester":
+        tickets_db = repository.list_tickets(
+            session, requester_id=current_user.id, status=status, priority=priority
+        )
+    elif current_user.role == "agent":
+        if assigned:
+            tickets_db = repository.list_tickets(
+                session,
+                assigned_agent_id=current_user.id,
+                status=status,
+                priority=priority,
+            )
+        else:
+            tickets_db = repository.list_tickets(
+                session, status=status, priority=priority
+            )
+    else:  # admin
+        tickets_db = repository.list_tickets(session, status=status, priority=priority)
+    return tickets_db
+
+
+@router.get("/{ticket_id}", response_model=TicketPublic)
+def get_ticket(
+    session: SessionDep,
+    current_user: CurrentUser,
+    ticket_id: int = Path(..., description="The ID of the ticket"),
+) -> TicketPublic:
+    """
+    Get a single ticket by ID.
+    - Requesters: Can view their own tickets only.
+    - Agents: Can view all tickets.
+    - Admin: Can view all tickets.
+    """
+    # TODO include the comments,
+    ticket = repository.get_ticket_by_id(session, ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    if current_user.role == "requester" and ticket.requester_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not allowed to view this ticket")
+
+    return ticket
+
+
+@router.post("/", response_model=TicketPublic, status_code=201)
+def create_ticket(
+    session: SessionDep,
+    current_user: CurrentUser,
+    ticket_in: TicketCreate,
+) -> TicketPublic:
+    """
+    Create a new ticket.
+    """
+    ticket = repository.create_ticket(session, ticket_in, requester_id=current_user.id)
+    return ticket
+
+
+@router.patch("/{ticket_id}", response_model=TicketPublic)
+def update_ticket(
+    session: SessionDep,
+    current_user: CurrentUser,
+    ticket_id: int,
+    ticket_in: TicketUpdate,
+) -> TicketPublic:
+    """
+    Update a ticket.
+    - Requesters: Can update only their own tickets (title, description, priority).
+    - Agents: Can update all tickets..
+    - Admin: Can update all tickets.
+    """
+    try:
+        updated_ticket = services.update_ticket_fields(
+            session, ticket_id, ticket_in, current_user
+        )
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return updated_ticket
+
+
+@router.delete("/{ticket_id}", response_model=None, status_code=204)
+def delete_ticket(ticket_id: int, session: SessionDep, current_user: CurrentUser):
+    """
+    Delete a ticket.
+    - only Admin can delete tickets.
+    """
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not allowed to delete tickets")
+
+    ticket = repository.get_ticket_by_id(session, ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    repository.repo_delete_ticket(session, ticket)
+    # TODO add success message

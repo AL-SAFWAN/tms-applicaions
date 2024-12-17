@@ -201,7 +201,6 @@ export function TogglePassword({
   [key: string]: any;
 }) {
   const [isVisible, setIsVisible] = useState<boolean>(false);
-  console.log(props);
   const toggleVisibility = () => setIsVisible((prevState) => !prevState);
   return (
     <div className={"relative " + divClassName}>

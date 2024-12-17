@@ -17,7 +17,6 @@ const BreadcrumbComponent = () => {
   const pathname = usePathname();
   const pathSegments = pathname.split("/");
 
-  console.log(pathSegments);
   return (
     <Breadcrumb>
       <BreadcrumbList className="text-sm">

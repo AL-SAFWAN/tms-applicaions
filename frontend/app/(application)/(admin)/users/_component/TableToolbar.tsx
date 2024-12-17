@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Table } from "@tanstack/react-table";
 import { PlusCircle, Search, Settings2, X } from "lucide-react";
-import { DataTableFacetedFilter } from "./TableFilter";
+import { DataTableFilter } from "../../../../../components/table/TableFilter";
 import { Button } from "@/components/ui/button";
 import {
   Overlay,
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/overlay";
 import { UserForm } from "./UserForm";
 import { User } from "@/schemas/authSchema";
-import { TableViewOptions } from "./TableViewOptions";
+import { TableViewOptions } from "../../../../../components/table/TableViewOptions";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -51,17 +51,17 @@ export function DataTableToolbar<TData>({
           />
         </div>
         <div className="flex min-w-full space-x-2 sm:min-w-0">
-          <DataTableFacetedFilter
+          <DataTableFilter
             className="w-full sm:w-fit"
             column={table.getColumn("role")}
             title="Role"
             options={[
-              { label: "Student", value: "student" },
-              { label: "Instructor", value: "instructor" },
+              { label: "Requester", value: "requester" },
+              { label: "Agent", value: "agent" },
               { label: "Admin", value: "admin" },
             ]}
           />
-          <DataTableFacetedFilter
+          <DataTableFilter
             className="w-full sm:w-fit"
             column={table.getColumn("isActive")}
             title="Status"

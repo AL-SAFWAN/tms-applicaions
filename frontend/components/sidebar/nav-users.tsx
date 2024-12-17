@@ -19,12 +19,10 @@ import {
 import { useLogoutMutation, useUser } from "@/hooks/auth";
 import { ModeToggleMenu } from "../main/Swtich";
 import { useTheme } from "next-themes";
-import UserProfileMenuItem from "../UserProfileOverlay";
 
 export function NavUser() {
   const { data: user } = useUser();
   const { isMobile } = useSidebar();
-  console.log(user);
   const { theme, setTheme } = useTheme();
 
   const toggleTheme = (e: any) => {
@@ -83,7 +81,6 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <UserProfileMenuItem />
               <DropdownMenuItem onClick={toggleTheme}>
                 <ModeToggleMenu />
               </DropdownMenuItem>

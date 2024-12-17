@@ -11,8 +11,6 @@ export default async function serverFetcher<T = any>(
   const cookieStore = cookies();
   const cookieHeader = cookieStore.toString();
 
-  console.log(`Server Fetcher: Fetching ${url} with cookies ${cookieHeader}`);
-
   return fetchWithErrorHandling(url, {
     ...options,
     headers: {

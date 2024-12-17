@@ -55,33 +55,10 @@ export const resetPasswordSchema = z
 
 export type ResetPasswordInputs = z.infer<typeof resetPasswordSchema>;
 
-export enum beltEnum {
-  White = "White",
-  Grey = "Grey",
-  Yellow = "Yellow",
-  Orange = "Orange",
-  Green = "Green",
-  Blue = "Blue",
-  Purple = "Purple",
-  Brown = "Brown",
-  Black = "Black",
-}
-export enum awardEnum {
-  None = "None",
-  White = "White",
-  Grey = "Grey",
-  Yellow = "Yellow",
-  Orange = "Orange",
-  Green = "Green",
-  Blue = "Blue",
-  Purple = "Purple",
-  Brown = "Brown",
-  Black = "Black",
-}
 export enum roleEnum {
-  student = "student",
+  requester = "requester",
   admin = "admin",
-  instructor = "instructor",
+  agent = "agent",
 }
 export interface User {
   email: string;
@@ -91,18 +68,5 @@ export interface User {
   firstName: string;
   lastName: string;
   password: string;
-  beltLevel: beltEnum;
-  awardLevel: awardEnum;
   createdAt: Date;
-  dateOfBirth: string;
-  age: string;
-  weight: number;
-  height: string;
-  address: string;
-  emergencyContactName: string;
-  emergencyContactRelationship: string;
-  emergencyContactPhone: string;
-  allergies: string;
-  medications: string;
-  medicalConditions: string;
 }

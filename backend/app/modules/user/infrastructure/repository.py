@@ -1,8 +1,8 @@
 from typing import Any
 
-from sqlmodel import Session, select, col, delete, func, cast, Date
+from sqlmodel import Session, select, func, cast, Date
+from uuid import UUID
 
-from app.core.models import Item
 from app.modules.user.domain.models import (
     UserCreate,
     UserUpdate,
@@ -78,8 +78,8 @@ def update_me_password(
 
 
 def delete_me(session: Session, current_user: User):
-    statement = delete(Item).where(col(Item.owner_id) == current_user.id)
-    session.exec(statement)  # type: ignore
+    # statement = delete(Item).where(col(Item.owner_id) == current_user.id)
+    # session.exec(statement)  # type: ignore
     session.delete(current_user)
     session.commit()
 
@@ -120,8 +120,14 @@ def get_user_by_email(*, session: Session, email: str) -> User | None:
     return session_user
 
 
+def get_user_by_id(*, session: Session, id: UUID) -> User | None:
+    statement = select(User).where(User.id == id)
+    session_user = session.exec(statement).first()
+    return session_user
+
+
 def delete_user(session: Session, user: User):
-    statement = delete(Item).where(col(Item.owner_id) == user.id)
-    session.exec(statement)  # type: ignore
+    # statement = delete(Item).where(col(Item.owner_id) == user.id)
+    # session.exec(statement)  # type: ignore
     session.delete(user)
     session.commit()

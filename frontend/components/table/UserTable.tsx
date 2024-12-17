@@ -13,7 +13,7 @@ interface DataTableProps<TData> {
   table: TableType<TData>;
 }
 
-export function UsersTable<TData>({ table }: DataTableProps<TData>) {
+export function DataTable<TData>({ table }: DataTableProps<TData>) {
   return (
     <ScrollArea className="rounded-md border">
       <Table>

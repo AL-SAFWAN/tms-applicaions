@@ -29,7 +29,6 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
     resolver: zodResolver(resetPasswordSchema),
   });
   function onSubmit(data: ResetPasswordInputs) {
-    console.log(token);
     if (token) {
       mutate({ ...data, token });
     }

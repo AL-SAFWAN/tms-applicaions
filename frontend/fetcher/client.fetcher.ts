@@ -127,6 +127,5 @@ export default async function clientFetcher<T = any>(
   });
   const responseData = convertKeysToCamelCase(response);
 
-  console.log(url, responseData);
   return responseData;
 }

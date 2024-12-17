@@ -18,8 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import UserChart from "./_component/UserChart";
 import { DataTableToolbar } from "./_component/TableToolbar";
 import { User } from "@/schemas/authSchema";
-import { UsersTable } from "./_component/UserTable";
-import { DataTableColumnHeader } from "./_component/TableColumnHeader";
+import { DataTable } from "../../../../components/table/UserTable";
+import { DataTableColumnHeader } from "../../../../components/table/TableColumnHeader";
 
 import { useUsers } from "@/hooks/users";
 import { DeleteDialog } from "./_component/DeleteDialog";
@@ -31,7 +31,6 @@ export default function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  console.log(user);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
   const columns: ColumnDef<User>[] = [
@@ -87,7 +86,6 @@ export default function UserManagement() {
             variant="ghost"
             size="xs"
             onClick={() => {
-              console.log();
               setSelectedUser(row.original);
               setIsOverlayOpen(true);
             }}
@@ -128,7 +126,7 @@ export default function UserManagement() {
           selectedUser={selectedUser}
           setSelectedUser={setSelectedUser}
         />
-        <UsersTable table={table} />
+        <DataTable table={table} />
       </div>
     </div>
   );
