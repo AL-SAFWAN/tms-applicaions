@@ -101,7 +101,7 @@ backend:
     - name: PROJECT_NAME
       value: "tms app"
     - name: ENVIRONMENT
-      value: "local"
+      value: "production"
     - name: BACKEND_CORS_ORIGINS
       value: "http://app.tms-applications.com, https://app.tms-applications.com"
     - name: FIRST_SUPERUSER_FIRSTNAME
