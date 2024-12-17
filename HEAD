@@ -1,7 +1,7 @@
 helm:
   parameters:
   - name: image.name
-    value: public.ecr.aws/m8h2m6a1/tms-frontend
+    value: public.ecr.aws/m8h2m6a1/tms-backend
     forcestring: true
   - name: image.tag
     value: 354d715
