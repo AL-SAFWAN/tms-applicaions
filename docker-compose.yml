@@ -32,7 +32,7 @@ services:
     environment:
       - ADMINER_DESIGN=pepa-linha-dark
     ports:
-      - "8080:8080" # Access via http://localhost:8080 for database management
+      - "8081:8080" # Access via http://localhost:8081 for database management
 
   prestart:
     image: "backend"
