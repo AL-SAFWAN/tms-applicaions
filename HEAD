@@ -1,14 +1,14 @@
 helm:
   parameters:
   - name: image.name
-    value: public.ecr.aws/m8h2m6a1/tms-frontend
+    value: public.ecr.aws/m8h2m6a1/tms-backend
     forcestring: true
   - name: image.tag
-    value: latest
+    value: "5414027"
     forcestring: true
   - name: backend.image.repository
     value: public.ecr.aws/m8h2m6a1/tms-backend
     forcestring: true
   - name: backend.image.tag
-    value: 36b5b0d
+    value: d2988c4
     forcestring: true
