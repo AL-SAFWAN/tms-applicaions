@@ -55,3 +55,23 @@ resource "kubernetes_secret" "argocd_repo_credentials" {
     password = local.github.token
   }
 }
+
+resource "kubernetes_config_map" "argocd_image_updater_config" {
+  metadata {
+    name      = "argocd-image-updater-config"
+    namespace = "argocd"
+  }
+
+  data = {
+    # Add [skip ci] to the commit message so that CI pipelines are skipped.
+    # The template uses Go template syntax. .AppName and .AppChanges are provided by
+    # Argo CD Image Updater.
+    "git.commit-message-template" = <<-EOT
+[skip ci] build: automatic update of {{ .AppName }}
+
+{{ range .AppChanges -}}
+Updates image {{ .Image }} from '{{ .OldTag }}' to '{{ .NewTag }}'
+{{ end }}
+EOT
+  }
+}
