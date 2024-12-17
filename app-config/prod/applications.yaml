@@ -8,7 +8,8 @@ metadata:
     argocd-image-updater.argoproj.io/image-list: "frontend=public.ecr.aws/m8h2m6a1/tms-frontend,backend=public.ecr.aws/m8h2m6a1/tms-backend"
     argocd-image-updater.argoproj.io/frontend.update-strategy: newest-build
 
-    argocd-image-updater.argoproj.io/backend.update-strategy: "newest-build"
+    argocd-image-updater.argoproj.io/backend.update-strategy: newest-build
+
     argocd-image-updater.argoproj.io/backend.allow-tags: ".*"
 
     argocd-image-updater.argoproj.io/backend.helm.image-name: backend.image.repository

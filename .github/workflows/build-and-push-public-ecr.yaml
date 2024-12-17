@@ -9,6 +9,8 @@ permissions:
 
 jobs:
   build-and-push:
+    if: github.actor != 'argocd-image-updater' # ignore if commit is from image updater
+    # ... rest of the job definition
     runs-on: ubuntu-latest
     env:
       FRONTEND_IMAGE: "public.ecr.aws/m8h2m6a1/tms-frontend"
