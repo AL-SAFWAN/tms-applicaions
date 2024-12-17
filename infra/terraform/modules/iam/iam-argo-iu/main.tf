@@ -31,4 +31,27 @@ resource "aws_eks_pod_identity_association" "argocd_image_updater" {
 }
 
 
+data "aws_secretsmanager_secret_version" "creds" {
+  secret_id = "github" # The name or ARN of your GitHub credentials secret
+}
 
+locals {
+  github = jsondecode(data.aws_secretsmanager_secret_version.creds.secret_string)
+}
+
+
+resource "kubernetes_secret" "argocd_repo_credentials" {
+  metadata {
+    name      = "repo-creds"
+    namespace = "argocd"
+    labels = {
+      "argocd.argoproj.io/secret-type" = "repository"
+    }
+  }
+
+  data = {
+    url      = "https://github.com/AL-SAFWAN/tms-applicaions.git"
+    username = "AL-SAFWAN"
+    password = local.github.token
+  }
+}
