@@ -10,5 +10,5 @@ helm:
     value: public.ecr.aws/m8h2m6a1/tms-backend
     forcestring: true
   - name: backend.image.tag
-    value: latest
+    value: d36b79a
     forcestring: true
