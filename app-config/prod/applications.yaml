@@ -10,7 +10,8 @@ metadata:
 
     argocd-image-updater.argoproj.io/backend.update-strategy: newest-build
 
-    argocd-image-updater.argoproj.io/backend.allow-tags: ".*"
+    argocd-image-updater.argoproj.io/backend.allow-tags: regexp:^[0-9a-f]{7}$
+    argocd-image-updater.argoproj.io/backend.ignore-tags: latest
 
     argocd-image-updater.argoproj.io/backend.helm.image-name: backend.image.repository
     argocd-image-updater.argoproj.io/backend.helm.image-tag: backend.image.tag
