@@ -1,8 +1,27 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 from sqlmodel import Field, SQLModel
 from app.core.models import PriorityEnum, StatusEnum
+from app.modules.user.domain.models import BasicUserPublic
+
+
+class CommentBase(SQLModel):
+    content: str = Field(..., max_length=255)
+
+
+class CommentCreate(CommentBase):
+    pass
+
+
+class CommentUpdate(SQLModel):
+    content: Optional[str] = Field(None, max_length=255)
+
+
+class CommentPublic(CommentBase):
+    id: int
+    author: BasicUserPublic
+    created_at: datetime
 
 
 class TicketBase(SQLModel):
@@ -30,5 +49,5 @@ class TicketPublic(TicketBase):
     id: int
     created_at: datetime
     resolved_at: Optional[datetime] = None
-    requester_id: UUID
-    assigned_agent_id: Optional[UUID] = None
+    requester: Optional[BasicUserPublic] = None
+    assigned_agent: Optional[BasicUserPublic] = None

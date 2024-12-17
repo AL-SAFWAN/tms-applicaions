@@ -1,10 +1,17 @@
 from typing import Optional, List
 from sqlmodel import Session, select
 from uuid import UUID
-from app.core.models import Ticket, StatusEnum, PriorityEnum
-from app.modules.tickets.domain.models import TicketCreate, TicketUpdate
+from app.core.models import Ticket, StatusEnum, PriorityEnum, Comment
+
+from app.modules.tickets.domain.models import (
+    TicketCreate,
+    TicketUpdate,
+    CommentCreate,
+    CommentUpdate,
+)
 
 
+# tickets
 def get_ticket_by_id(session: Session, ticket_id: int) -> Optional[Ticket]:
     statement = select(Ticket).where(Ticket.id == ticket_id)
     return session.exec(statement).first()
@@ -49,7 +56,6 @@ def update_ticket(
     session: Session, ticket: Ticket, ticket_in: TicketUpdate | None = None
 ) -> Ticket:
     ticket_data = ticket_in.model_dump(exclude_unset=True)
-    print(ticket_data)
     ticket.sqlmodel_update(ticket_data)
     session.add(ticket)
     session.commit()
@@ -59,4 +65,43 @@ def update_ticket(
 
 def delete_ticket(session: Session, ticket: Ticket):
     session.delete(ticket)
+    session.commit()
+
+
+# comments
+def create_comment(
+    session: Session, ticket_id: int, author_id: UUID, comment_in: CommentCreate
+) -> Comment:
+    db_comment = Comment(
+        content=comment_in.content, ticket_id=ticket_id, author_id=author_id
+    )
+    session.add(db_comment)
+    session.commit()
+    session.refresh(db_comment)
+    return db_comment
+
+
+def get_comment_by_id(session: Session, comment_id: int) -> Optional[Comment]:
+    statement = select(Comment).where(Comment.id == comment_id)
+    return session.exec(statement).first()
+
+
+def list_comments_for_ticket(session: Session, ticket_id: int) -> List[Comment]:
+    statement = select(Comment).where(Comment.ticket_id == ticket_id)
+    return session.exec(statement).all()
+
+
+def update_comment(
+    session: Session, comment: Comment, comment_in: CommentUpdate
+) -> Comment:
+    comment_data = comment_in.model_dump(exclude_unset=True)
+    comment.sqlmodel_update(comment_data)
+    session.add(comment)
+    session.commit()
+    session.refresh(comment)
+    return comment
+
+
+def delete_comment(session: Session, comment: Comment):
+    session.delete(comment)
     session.commit()

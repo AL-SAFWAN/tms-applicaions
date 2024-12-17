@@ -5,8 +5,15 @@ from fastapi import APIRouter, Path, Query, HTTPException
 
 from app.modules.deps import SessionDep, CurrentUser
 
-from app.modules.tickets.domain.models import TicketCreate, TicketUpdate, TicketPublic
-from app.core.models import Ticket, StatusEnum, PriorityEnum
+from app.modules.tickets.domain.models import (
+    TicketCreate,
+    TicketUpdate,
+    TicketPublic,
+    CommentCreate,
+    CommentPublic,
+    CommentUpdate,
+)
+from app.core.models import StatusEnum, PriorityEnum, RoleEnum
 
 from app.modules.tickets.infrastructure import repository
 from app.modules.tickets.domain import services
@@ -126,5 +133,95 @@ def delete_ticket(ticket_id: int, session: SessionDep, current_user: CurrentUser
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    repository.repo_delete_ticket(session, ticket)
+    repository.delete_ticket(session, ticket)
     # TODO add success message
+
+
+# comment
+@router.post("/{ticket_id}/comments", response_model=CommentPublic, status_code=201)
+def create_comment_endpoint(
+    session: SessionDep,
+    current_user: CurrentUser,
+    ticket_id: int,
+    comment_in: CommentCreate,
+):
+    """
+    Create a comment on a given ticket.
+    """
+    ticket = repository.get_ticket_by_id(session, ticket_id)
+
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    comment = repository.create_comment(session, ticket_id, current_user.id, comment_in)
+    return comment
+
+
+@router.get("/{ticket_id}/comments", response_model=List[CommentPublic])
+def list_comments_endpoint(
+    session: SessionDep,
+    current_user: CurrentUser,
+    ticket_id: int,
+):
+    """
+    List all comments for a given ticket.
+    - Example rule: All roles can view comments on a ticket they are allowed to see.
+      For simplicity, assume:
+      - Requesters can view comments if they own the ticket.
+      - Agents/admins can view comments of all tickets.
+    """
+    ticket = repository.get_ticket_by_id(session, ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    if (
+        current_user.role == RoleEnum.requester
+        and ticket.requester_id != current_user.id
+    ):
+        raise HTTPException(status_code=403, detail="Not allowed to view these comments")
+
+    comments = repository.list_comments_for_ticket(session, ticket_id)
+    return comments
+
+
+@router.patch("/comments/{comment_id}", response_model=CommentPublic)
+def update_comment_endpoint(
+    session: SessionDep,
+    current_user: CurrentUser,
+    comment_id: int,
+    comment_in: CommentUpdate,
+):
+    """
+    Update an existing comment.
+    -  Only the comment author or an admin can edit the comment.
+    """
+    comment = repository.get_comment_by_id(session, comment_id)
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    if comment.author_id != current_user.id and current_user.role != RoleEnum.admin:
+        raise HTTPException(status_code=403, detail="Not allowed to edit this comment")
+
+    comment = repository.update_comment(session, comment, comment_in)
+    return comment
+
+
+@router.delete("/comments/{comment_id}", status_code=204)
+def delete_comment_endpoint(
+    session: SessionDep,
+    current_user: CurrentUser,
+    comment_id: int,
+):
+    """
+    Delete a comment.
+    -  Only the comment author or an admin can delete the comment.
+    """
+    comment = repository.get_comment_by_id(session, comment_id)
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    if comment.author_id != current_user.id and current_user.role != RoleEnum.admin:
+        raise HTTPException(status_code=403, detail="Not allowed to delete this comment")
+
+    repository.delete_comment(session, comment)
+    # return

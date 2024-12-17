@@ -32,6 +32,7 @@ class RoleEnum(str, Enum):
     admin = "admin"
 
 
+# TODO remove user base here
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
@@ -53,8 +54,11 @@ class User(UserBase, table=True):
     # A requester can create many tickets
     tickets_requested: List["Ticket"] = Relationship(
         sa_relationship=RelationshipProperty(
-            "Ticket", back_populates="requester", foreign_keys="[Ticket.requester_id]"
-        )
+            "Ticket",
+            back_populates="requester",
+            foreign_keys="[Ticket.requester_id]",
+            cascade="all, delete-orphan",
+        ),
     )
 
     # A helpdesk agent can be assigned multiple tickets
@@ -63,11 +67,13 @@ class User(UserBase, table=True):
             "Ticket",
             back_populates="assigned_agent",
             foreign_keys="[Ticket.assigned_agent_id]",
-        )
+        ),
     )
 
     # A user can make many comments
-    comments: List["Comment"] = Relationship(back_populates="author")
+    comments: List["Comment"] = Relationship(
+        back_populates="author", cascade_delete=True
+    )
 
 
 class Ticket(SQLModel, table=True):
@@ -81,8 +87,14 @@ class Ticket(SQLModel, table=True):
     resolved_at: Optional[datetime] = Field(default=None)
 
     # Foreign keys
-    requester_id: uuid.UUID = Field(foreign_key="user.id")
-    assigned_agent_id: uuid.UUID | None = Field(default=None, foreign_key="user.id")
+    requester_id: uuid.UUID = Field(
+        foreign_key="user.id",
+        ondelete="CASCADE",
+        nullable=False,
+    )
+    assigned_agent_id: uuid.UUID | None = Field(
+        default=None, foreign_key="user.id", ondelete="SET NULL"
+    )
 
     # Relationships
     requester: "User" = Relationship(
@@ -90,7 +102,8 @@ class Ticket(SQLModel, table=True):
             "User",
             back_populates="tickets_requested",
             foreign_keys="[Ticket.requester_id]",
-        )
+        ),
+        cascade_delete=True,
     )
     assigned_agent: Optional["User"] = Relationship(
         sa_relationship=RelationshipProperty(
@@ -99,7 +112,9 @@ class Ticket(SQLModel, table=True):
             foreign_keys="[Ticket.assigned_agent_id]",
         )
     )
-    comments: List["Comment"] = Relationship(back_populates="ticket")
+    comments: List["Comment"] = Relationship(
+        back_populates="ticket", cascade_delete=True
+    )
 
 
 class Comment(SQLModel, table=True):
@@ -109,7 +124,7 @@ class Comment(SQLModel, table=True):
 
     # Foreign keys
     ticket_id: int = Field(foreign_key="ticket.id")
-    author_id: uuid.UUID = Field(foreign_key="user.id")
+    author_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE")
 
     # Relationships
     ticket: "Ticket" = Relationship(back_populates="comments")
