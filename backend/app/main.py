@@ -27,6 +27,7 @@ if settings.all_cors_origins:
         allow_origins=[
             "http://app.tms-applications.com",
             "https://app.tms-applications.com",
+            "http://localhost:3000",
         ],
         allow_credentials=True,
         allow_methods=["*"],
