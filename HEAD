@@ -4,7 +4,7 @@ helm:
     value: public.ecr.aws/m8h2m6a1/tms-backend
     forcestring: true
   - name: image.tag
-    value: c5415f9
+    value: 4c41ec9
     forcestring: true
   - name: backend.image.repository
     value: public.ecr.aws/m8h2m6a1/tms-backend
