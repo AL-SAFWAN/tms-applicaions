@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd-image-updater.argoproj.io/write-back-method: git
     argocd-image-updater.argoproj.io/image-list: "frontend=public.ecr.aws/m8h2m6a1/tms-frontend,backend=public.ecr.aws/m8h2m6a1/tms-backend"
-    argocd-image-updater.argoproj.io/frontend.update-strategy: latest
+    argocd-image-updater.argoproj.io/frontend.update-strategy: newest-build
 
     argocd-image-updater.argoproj.io/backend.update-strategy: "name"
     argocd-image-updater.argoproj.io/backend.tag-match: ".*"
