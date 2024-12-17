@@ -48,7 +48,7 @@ jobs:
       - name: Build Backend Image
         run: |
           COMMIT_SHORT=$(echo $GITHUB_SHA | cut -c1-7)
-          docker build 
+          docker build \
             -t $BACKEND_IMAGE:latest \
             -t $BACKEND_IMAGE:$COMMIT_SHORT \
             backend/
