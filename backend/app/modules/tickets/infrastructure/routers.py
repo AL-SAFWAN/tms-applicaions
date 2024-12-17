@@ -13,7 +13,7 @@ from app.modules.tickets.domain.models import (
     CommentPublic,
     CommentUpdate,
 )
-from app.core.models import StatusEnum, PriorityEnum, RoleEnum
+from app.core.models import StatusEnum, PriorityEnum, RoleEnum, Message
 
 from app.modules.tickets.infrastructure import repository
 from app.modules.tickets.domain import services
@@ -55,7 +55,7 @@ def list_tickets(
             tickets_db = repository.list_tickets(
                 session, status=status, priority=priority
             )
-    else:  # admin
+    else:
         tickets_db = repository.list_tickets(session, status=status, priority=priority)
     return tickets_db
 
@@ -72,7 +72,6 @@ def get_ticket(
     - Agents: Can view all tickets.
     - Admin: Can view all tickets.
     """
-    # TODO include the comments,
     ticket = repository.get_ticket_by_id(session, ticket_id)
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
@@ -134,12 +133,11 @@ def delete_ticket(ticket_id: int, session: SessionDep, current_user: CurrentUser
         raise HTTPException(status_code=404, detail="Ticket not found")
 
     repository.delete_ticket(session, ticket)
-    # TODO add success message
+    return Message(detail="Ticket deleted successfully")
 
 
-# comment
 @router.post("/{ticket_id}/comments", response_model=CommentPublic, status_code=201)
-def create_comment_endpoint(
+def create_comment(
     session: SessionDep,
     current_user: CurrentUser,
     ticket_id: int,
@@ -158,7 +156,7 @@ def create_comment_endpoint(
 
 
 @router.get("/{ticket_id}/comments", response_model=List[CommentPublic])
-def list_comments_endpoint(
+def list_comments(
     session: SessionDep,
     current_user: CurrentUser,
     ticket_id: int,
@@ -185,7 +183,7 @@ def list_comments_endpoint(
 
 
 @router.patch("/comments/{comment_id}", response_model=CommentPublic)
-def update_comment_endpoint(
+def update_comment(
     session: SessionDep,
     current_user: CurrentUser,
     comment_id: int,
@@ -207,7 +205,7 @@ def update_comment_endpoint(
 
 
 @router.delete("/comments/{comment_id}", status_code=204)
-def delete_comment_endpoint(
+def delete_comment(
     session: SessionDep,
     current_user: CurrentUser,
     comment_id: int,
@@ -224,4 +222,4 @@ def delete_comment_endpoint(
         raise HTTPException(status_code=403, detail="Not allowed to delete this comment")
 
     repository.delete_comment(session, comment)
-    # return
+    return Message(detail="Comment deleted successfully")
