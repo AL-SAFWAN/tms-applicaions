@@ -1,9 +1,9 @@
 import sentry_sdk
-import logging
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
-
+from .csrfMiddleware import CSRFMiddleware
+from .bleachMiddleware import SanitizeMiddleware
 from app.modules.main import api_router
 from app.core.config import settings
 
@@ -20,6 +20,9 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
 )
+# apply middleware
+app.add_middleware(CSRFMiddleware)
+app.add_middleware(SanitizeMiddleware)
 
 if settings.all_cors_origins:
     app.add_middleware(

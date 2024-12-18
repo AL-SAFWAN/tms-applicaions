@@ -1,9 +1,10 @@
 from fastapi.encoders import jsonable_encoder
 from sqlmodel import Session
 
-from app.modules.item import operations
-from app.core.models import User, UserCreate, UserUpdate
-from app.core.security import verify_password
+from app.modules.user.infrastructure import repository as operations
+from app.modules.user.domain.models import UserCreate, UserUpdate
+from app.core.models import User
+from app.modules.auth import verify_password
 from app.tests.utils.utils import random_email, random_lower_string
 
 

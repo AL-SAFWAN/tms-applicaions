@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 
 from app.core.config import settings
 from app.core.models import User
-from app.core.security import verify_password
+from app.modules.auth import verify_password
 from app.modules.email.domain.service import generate_password_reset_token
 
 
