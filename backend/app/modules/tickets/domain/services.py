@@ -1,6 +1,6 @@
 from sqlmodel import Session
 
-from app.core.models import User, Ticket
+from app.core.models import User, Ticket, RoleEnum
 
 from app.modules.tickets.infrastructure.repository import get_ticket_by_id, update_ticket
 from app.modules.tickets.domain.models import TicketUpdate
@@ -14,8 +14,8 @@ def assign_agent_to_ticket(
     user = get_user_by_id(session=session, id=ticket_in.assigned_agent_id)
     if user is None:
         raise ValueError("Agent does not exist")
-    if user.role == "requester":
-        raise ValueError("Only agents or admin can only be assigned to tickets")
+    if user.role == RoleEnum.requester:
+        raise ValueError("Only agents or admin can be assigned to tickets")
     ticket_in.assigned_agent_id = user.id
     return update_ticket(session, ticket, ticket_in)
 

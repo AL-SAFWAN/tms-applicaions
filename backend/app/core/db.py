@@ -32,7 +32,6 @@ def init_db(session: Session) -> None:
             password=settings.FIRST_SUPERUSER_PASSWORD,
             first_name=settings.FIRST_SUPERUSER_FIRSTNAME,
             last_name=settings.FIRST_SUPERUSER_LASTNAME,
-            # is_superuser=True,
             role=RoleEnum.admin,
         )
         user = repository.create_user(session=session, user_in=user_in)

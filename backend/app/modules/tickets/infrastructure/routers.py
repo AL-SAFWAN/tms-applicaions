@@ -35,15 +35,14 @@ def list_tickets(
     """
     List tickets.
     - Requesters: List only their own tickets.
-    - Agents: List all tickets  and assigned.
+    - Agents: List all tickets and assigned.
     - Admin: List all tickets.
     """
-
-    if current_user.role == "requester":
+    if current_user.role == RoleEnum.requester:
         tickets_db = repository.list_tickets(
             session, requester_id=current_user.id, status=status, priority=priority
         )
-    elif current_user.role == "agent":
+    elif current_user.role == RoleEnum.agent:
         if assigned:
             tickets_db = repository.list_tickets(
                 session,
@@ -76,7 +75,10 @@ def get_ticket(
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    if current_user.role == "requester" and ticket.requester_id != current_user.id:
+    if (
+        current_user.role == RoleEnum.requester
+        and ticket.requester_id != current_user.id
+    ):
         raise HTTPException(status_code=403, detail="Not allowed to view this ticket")
 
     return ticket
@@ -123,9 +125,9 @@ def update_ticket(
 def delete_ticket(ticket_id: int, session: SessionDep, current_user: CurrentUser):
     """
     Delete a ticket.
-    - only Admin can delete tickets.
+    - Only Admin can delete tickets.
     """
-    if current_user.role != "admin":
+    if current_user.role != RoleEnum.admin:
         raise HTTPException(status_code=403, detail="Not allowed to delete tickets")
 
     ticket = repository.get_ticket_by_id(session, ticket_id)
@@ -163,10 +165,8 @@ def list_comments(
 ):
     """
     List all comments for a given ticket.
-    - Example rule: All roles can view comments on a ticket they are allowed to see.
-      For simplicity, assume:
-      - Requesters can view comments if they own the ticket.
-      - Agents/admins can view comments of all tickets.
+    - Requesters can view comments if they own the ticket.
+    - Agents/admins can view comments of all tickets.
     """
     ticket = repository.get_ticket_by_id(session, ticket_id)
     if not ticket:
