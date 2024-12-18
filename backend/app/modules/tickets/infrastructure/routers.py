@@ -1,6 +1,5 @@
 from typing import List
 
-# from uuid import UUID
 from fastapi import APIRouter, Path, Query, HTTPException
 
 from app.modules.deps import SessionDep, CurrentUser
@@ -121,7 +120,7 @@ def update_ticket(
     return updated_ticket
 
 
-@router.delete("/{ticket_id}", response_model=None, status_code=204)
+@router.delete("/{ticket_id}")
 def delete_ticket(ticket_id: int, session: SessionDep, current_user: CurrentUser):
     """
     Delete a ticket.
@@ -135,7 +134,6 @@ def delete_ticket(ticket_id: int, session: SessionDep, current_user: CurrentUser
         raise HTTPException(status_code=404, detail="Ticket not found")
 
     repository.delete_ticket(session, ticket)
-    return Message(detail="Ticket deleted successfully")
 
 
 @router.post("/{ticket_id}/comments", response_model=CommentPublic, status_code=201)
@@ -204,7 +202,9 @@ def update_comment(
     return comment
 
 
-@router.delete("/comments/{comment_id}", status_code=204)
+@router.delete(
+    "/comments/{comment_id}",
+)
 def delete_comment(
     session: SessionDep,
     current_user: CurrentUser,
@@ -222,4 +222,3 @@ def delete_comment(
         raise HTTPException(status_code=403, detail="Not allowed to delete this comment")
 
     repository.delete_comment(session, comment)
-    return Message(detail="Comment deleted successfully")

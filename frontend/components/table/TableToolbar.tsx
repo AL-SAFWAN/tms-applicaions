@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Table } from "@tanstack/react-table";
 import { PlusCircle, Search, Settings2, X } from "lucide-react";
-import { DataTableFilter } from "../../../../../components/table/TableFilter";
+import { DataTableFilter } from "./TableFilter";
 import { Button } from "@/components/ui/button";
 import {
   Overlay,
@@ -12,26 +12,26 @@ import {
   OverlayTrigger,
   OverlayHeader,
 } from "@/components/ui/overlay";
-import { UserForm } from "./UserForm";
+import { UserForm } from "../../app/(application)/(admin)/users/_component/UserForm";
 import { User } from "@/schemas/authSchema";
-import { TableViewOptions } from "../../../../../components/table/TableViewOptions";
+import { TableViewOptions } from "./TableViewOptions";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   setIsOverlayOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedUser: React.Dispatch<React.SetStateAction<User | null>>;
-  selectedUser: User | null;
   searchTerm: string;
   isOverlayOpen: boolean;
+  renderOverlayContent: () => React.ReactNode;
+  renderFilterContent: () => React.ReactNode;
 }
 
 export function DataTableToolbar<TData>({
   table,
   setSearchTerm,
   searchTerm,
-  setSelectedUser,
-  selectedUser,
+  renderOverlayContent,
+  renderFilterContent,
   isOverlayOpen,
   setIsOverlayOpen,
 }: DataTableToolbarProps<TData>) {
@@ -43,7 +43,7 @@ export function DataTableToolbar<TData>({
         <div className="relative flex min-w-full items-center pb-2 sm:min-w-0">
           <Search className="absolute left-2 top-4 size-4 -translate-y-1/2 transform text-gray-400" />
           <Input
-            placeholder="Search users..."
+            placeholder="Search ..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="h-7 pl-7"
@@ -51,25 +51,8 @@ export function DataTableToolbar<TData>({
           />
         </div>
         <div className="flex min-w-full space-x-2 sm:min-w-0">
-          <DataTableFilter
-            className="w-full sm:w-fit"
-            column={table.getColumn("role")}
-            title="Role"
-            options={[
-              { label: "Requester", value: "requester" },
-              { label: "Agent", value: "agent" },
-              { label: "Admin", value: "admin" },
-            ]}
-          />
-          <DataTableFilter
-            className="w-full sm:w-fit"
-            column={table.getColumn("isActive")}
-            title="Status"
-            options={[
-              { label: "Active", value: "active" },
-              { label: "Inactive", value: "inactive" },
-            ]}
-          />
+          {renderFilterContent()}
+
           {isFiltered && (
             <Button
               variant="outline"
@@ -84,24 +67,7 @@ export function DataTableToolbar<TData>({
       </div>
       <div className="flex min-w-full space-x-2 self-start pb-2 sm:min-w-0">
         <TableViewOptions table={table} className="w-full sm:w-fit" />
-        <Overlay open={isOverlayOpen} onOpenChange={setIsOverlayOpen}>
-          <OverlayTrigger asChild>
-            <Button
-              onClick={() => setSelectedUser(null)}
-              className="h-8 w-full sm:w-fit"
-            >
-              <PlusCircle /> Add New User
-            </Button>
-          </OverlayTrigger>
-          <OverlayContent className="md:max-w-[673px]">
-            <OverlayHeader>
-              <OverlayTitle>
-                {selectedUser ? "Edit User" : "Add New User"}
-              </OverlayTitle>
-            </OverlayHeader>
-            <UserForm user={selectedUser} setOpen={setIsOverlayOpen} />
-          </OverlayContent>
-        </Overlay>
+        {renderOverlayContent()}
       </div>
     </div>
   );

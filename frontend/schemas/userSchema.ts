@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { roleEnum } from "./authSchema";
 
+export const BasicUserPublicSchema = z.object({
+  email: z.string().email(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+});
+// TODO remove this
 export const UserUpdateSchema = z.object({
   email: z.string().email("Invalid email address").optional(),
   firstName: z.string().min(1, "First name is required").optional(),

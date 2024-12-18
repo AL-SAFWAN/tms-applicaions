@@ -23,10 +23,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useUser } from "@/hooks/auth";
+import TicketManagement from "./_component/Table";
 
 export default function Page() {
-  const { data } = useUser();
-
+  const { data, isLoading } = useUser();
+  if (isLoading) return <div>Loading ...</div>;
   return (
     <div className="container">
       {/* <h1 className="mb-8 text-4xl font-bold">Home</h1> */}
@@ -87,15 +88,9 @@ export default function Page() {
               </CardContent>
             </Card>
 
-            <Card className="col-span-full">
-              <CardHeader>
-                <CardTitle className="flex flex-row items-center">
-                  List of Tickets
-                </CardTitle>
-              </CardHeader>
-              {/* TODO  add table here */}
-              <CardContent>add table here</CardContent>
-            </Card>
+            {/* <Card className="col-span-full"> */}
+            {/* TODO  add table here */}
+            <TicketManagement />
           </div>
         </ScrollArea>
       </div>

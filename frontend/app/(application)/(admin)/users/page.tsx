@@ -12,11 +12,11 @@ import {
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 
-import { Edit } from "lucide-react";
+import { Edit, PlusCircleIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 import UserChart from "./_component/UserChart";
-import { DataTableToolbar } from "./_component/TableToolbar";
+import { DataTableToolbar } from "../../../../components/table/TableToolbar";
 import { User } from "@/schemas/authSchema";
 import { DataTable } from "../../../../components/table/UserTable";
 import { DataTableColumnHeader } from "../../../../components/table/TableColumnHeader";
@@ -24,6 +24,15 @@ import { DataTableColumnHeader } from "../../../../components/table/TableColumnH
 import { useUsers } from "@/hooks/users";
 import { DeleteDialog } from "./_component/DeleteDialog";
 import { DeactivateButton } from "./_component/DeactiveButton";
+import {
+  Overlay,
+  OverlayContent,
+  OverlayHeader,
+  OverlayTitle,
+  OverlayTrigger,
+} from "@/components/ui/overlay";
+import { UserForm } from "./_component/UserForm";
+import { DataTableFilter } from "@/components/table/TableFilter";
 
 export default function UserManagement() {
   const { data: user = [] } = useUsers();
@@ -123,8 +132,49 @@ export default function UserManagement() {
           setIsOverlayOpen={setIsOverlayOpen}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          selectedUser={selectedUser}
-          setSelectedUser={setSelectedUser}
+          renderFilterContent={() => (
+            <>
+              <DataTableFilter
+                className="w-full sm:w-fit"
+                column={table.getColumn("role")}
+                title="Role"
+                options={[
+                  { label: "Requester", value: "requester" },
+                  { label: "Agent", value: "agent" },
+                  { label: "Admin", value: "admin" },
+                ]}
+              />
+              <DataTableFilter
+                className="w-full sm:w-fit"
+                column={table.getColumn("isActive")}
+                title="Status"
+                options={[
+                  { label: "Active", value: "active" },
+                  { label: "Inactive", value: "inactive" },
+                ]}
+              />
+            </>
+          )}
+          renderOverlayContent={() => (
+            <Overlay open={isOverlayOpen} onOpenChange={setIsOverlayOpen}>
+              <OverlayTrigger asChild>
+                <Button
+                  onClick={() => setSelectedUser(null)}
+                  className="h-8 w-full sm:w-fit"
+                >
+                  <PlusCircleIcon /> Add New User
+                </Button>
+              </OverlayTrigger>
+              <OverlayContent className="md:max-w-[673px]">
+                <OverlayHeader>
+                  <OverlayTitle>
+                    {selectedUser ? "Edit User" : "Add New User"}
+                  </OverlayTitle>
+                </OverlayHeader>
+                <UserForm user={selectedUser} setOpen={setIsOverlayOpen} />
+              </OverlayContent>
+            </Overlay>
+          )}
         />
         <DataTable table={table} />
       </div>
