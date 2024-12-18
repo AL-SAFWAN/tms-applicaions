@@ -10,7 +10,7 @@ function Navbar() {
       <aside className="group flex items-center gap-[2px] rounded-lg">
         <TicketIcon className="m-2 size-7 rounded-lg object-contain" />
         <p className="text-xl font-bold tracking-tighter">
-          Ticket Management System
+          Ticket Management System V2
         </p>
       </aside>
 
