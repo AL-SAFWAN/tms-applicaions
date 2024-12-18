@@ -3,7 +3,6 @@ import { NextRequest } from "next/server";
 
 export default async function middleware(request: NextRequest) {
   const accessToken = request.cookies.get("access_token");
-  console.log("accessToken", accessToken);
   const publicRoutes = [
     "/login",
     "/login/password-recover",

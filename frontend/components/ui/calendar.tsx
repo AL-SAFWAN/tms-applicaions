@@ -32,7 +32,6 @@ const Dropdown = React.memo(function Dropdown({
   children,
   ...props
 }: DropdownProps) {
-  console.log("hello");
   const options = React.Children.toArray(children) as React.ReactElement<
     React.HTMLProps<HTMLOptionElement>
   >[];

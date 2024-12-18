@@ -4,7 +4,6 @@ import { createUserInputs } from "@/schemas/userSchema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-// CRUD
 const createUser = async (data: createUserInputs) =>
   clientFetcher<User>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/`, {
     method: "POST",
@@ -27,30 +26,10 @@ export const useCreateUserMutation = () => {
 const readUsers = async () =>
   clientFetcher<User[]>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/`);
 
-function calculateAge(birthDate: string) {
-  const today = new Date();
-  const birth = new Date(birthDate);
-
-  let age = today.getFullYear() - birth.getFullYear();
-  const monthDifference = today.getMonth() - birth.getMonth();
-  const dayDifference = today.getDate() - birth.getDate();
-
-  if (monthDifference < 0 || (monthDifference === 0 && dayDifference < 0)) {
-    age--;
-  }
-
-  return age.toString();
-}
-
 export const useUsers = () => {
   return useQuery({
     queryKey: ["users"],
     queryFn: readUsers,
-    select: (data) =>
-      data.map((data) => ({
-        ...data,
-        age: calculateAge(data.dateOfBirth),
-      })),
   });
 };
 

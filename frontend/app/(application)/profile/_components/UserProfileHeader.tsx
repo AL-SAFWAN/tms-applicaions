@@ -1,7 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import EditProfileOverlay from "./EditProfileOverlay";
 import { useUser } from "@/hooks/auth";
 import ChangePasswordOverlay from "./ChangePassword";
 
@@ -25,18 +23,11 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = () => {
               {user?.firstName} {user?.lastName}
             </h1>
             <p className="text-muted-foreground">
-              Member since {user?.createdAt.toLocaleDateString()}
+              joined since {user?.createdAt?.toLocaleDateString()}
             </p>
+          </div>
 
-            <div className="mt-4 flex w-fit flex-wrap justify-center gap-2 md:justify-start">
-              <Badge variant="secondary">{user?.beltLevel} Belt</Badge>
-              <Badge variant="secondary">{user?.awardLevel} Award</Badge>
-            </div>
-          </div>
-          <div className="flex flex-wrap justify-center sm:justify-end">
-            {user && <EditProfileOverlay user={user} />}
-            {user && <ChangePasswordOverlay user={user} />}
-          </div>
+          {user && <ChangePasswordOverlay user={user} />}
         </div>
       </CardContent>
     </Card>

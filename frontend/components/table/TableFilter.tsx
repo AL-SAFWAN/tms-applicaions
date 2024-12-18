@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-interface DataTableFacetedFilterProps<TData, TValue> {
+interface DataTableFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
   title?: string;
   className?: string;
@@ -32,12 +32,12 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   }[];
 }
 
-export function DataTableFacetedFilter<TData, TValue>({
+export function DataTableFilter<TData, TValue>({
   column,
   title,
   options,
   className,
-}: DataTableFacetedFilterProps<TData, TValue>) {
+}: DataTableFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues();
   const selectedValues = new Set(column?.getFilterValue() as string[]);
 

@@ -11,7 +11,6 @@ from app.modules.deps import (
 from app.modules.user.infrastructure import repository
 from app.modules.user.domain.models import (
     UpdatePassword,
-    User,
     UserCreate,
     UserPublic,
     UserRegister,
@@ -19,7 +18,7 @@ from app.modules.user.domain.models import (
     UserUpdateMe,
 )
 from app.core.config import settings
-from app.core.models import Message, RoleEnum
+from app.core.models import Message, RoleEnum, User
 
 from app.modules.auth.domain import service as auth_service
 from app.modules.email.domain.service import generate_new_account_email, send_email

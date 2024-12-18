@@ -1,12 +1,8 @@
 import clientFetcher from "@/fetcher/client.fetcher";
-import {
-  EmergencyInfoUpdateInputs,
-  PasswordUpdateInputs,
-  UserUpdateInputs,
-} from "@/schemas/userSchema";
+import { PasswordUpdateInputs, UserUpdateInputs } from "@/schemas/userSchema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const updateUser = async (data: UserUpdateInputs | EmergencyInfoUpdateInputs) =>
+const updateUser = async (data: UserUpdateInputs) =>
   clientFetcher(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/me`, {
     method: "PATCH",
     body: data,

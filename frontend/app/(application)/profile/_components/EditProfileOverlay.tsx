@@ -25,7 +25,6 @@ const EditProfileOverlay = ({ user }: { user: User }) => {
         <OverlayHeader>
           <OverlayTitle>Edit Profile</OverlayTitle>
         </OverlayHeader>
-        <EditForm user={user} />
       </OverlayContent>
     </Overlay>
   );
